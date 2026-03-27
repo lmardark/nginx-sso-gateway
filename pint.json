@@ -1,5 +1,12 @@
 {
     "preset": "laravel",
+    "exclude": [
+        "bootstrap",
+        "config",
+        "database",
+        "routes",
+        "tests"
+    ],
     "rules": {
         "array_push": true,
         "backtick_to_shell_exec": true,
@@ -17,6 +24,9 @@
             "import_functions": true
         },
         "mb_str_functions": true,
+        "return_type_declaration": {
+            "space_before": "none"
+        },
         "modernize_types_casting": true,
         "new_with_parentheses": false,
         "no_superfluous_elseif": true,
