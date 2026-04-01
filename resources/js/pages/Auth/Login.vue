@@ -75,7 +75,7 @@ function submit() {
                             id="username"
                             v-model="form.username"
                             type="text"
-                            autocomplete="username"
+                            autocomplete="name"
                             required
                             placeholder="Seu Usuário"
                             class="w-full rounded-sm border border-[#e3e3e0] bg-[#FDFDFC] px-3 py-2 text-sm text-[#1b1b18] outline-none transition placeholder:text-[#b5b3ad] focus:border-[#1b1b18] focus:ring-1 focus:ring-[#1b1b18] disabled:opacity-50 dark:border-[#3E3E3A] dark:bg-[#1a1a18] dark:text-[#EDEDEC] dark:placeholder:text-[#55544f] dark:focus:border-[#EDEDEC] dark:focus:ring-[#EDEDEC]"

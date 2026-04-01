@@ -11,7 +11,7 @@ final class AuthService
     /**
      * @param  array<string, mixed>  $credentials
      */
-    public function AutenticationFunction(array $credentials): bool
+    public function autenticationFunction(array $credentials): bool
     {
         if (Auth::attempt([
             'username' => $credentials['username'],

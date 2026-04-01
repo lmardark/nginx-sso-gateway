@@ -6,11 +6,14 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Middleware\UniversalAuth;
 
-Route::redirect('/', '/login');
+const LOGIN_PATH = '/login';
 
-Route::inertia('/login', 'Auth/Login')->name('login')->middleware('universal.auth');
-Route::inertia('/dashboard', 'Dashboard')->name('dashboard')->middleware('universal.auth');
+Route::redirect('/', LOGIN_PATH);
 
-Route::post('/login', [AuthController::class, 'login']);
+Route::post(LOGIN_PATH, [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+Route::middleware(['universal.auth'])->group(function () {
+    Route::inertia(LOGIN_PATH, 'Auth/Login')->name('login');
+    Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
+});

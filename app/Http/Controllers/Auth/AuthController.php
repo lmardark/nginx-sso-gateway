@@ -21,7 +21,7 @@ final class AuthController extends Controller
 
     public function login(LoginRequest $request): RedirectResponse
     {
-        $isAuthenticated = $this->authService->AutenticationFunction($request->validated());
+        $isAuthenticated = $this->authService->autenticationFunction($request->validated());
 
         if ($isAuthenticated) {
             $request->session()->regenerate();
