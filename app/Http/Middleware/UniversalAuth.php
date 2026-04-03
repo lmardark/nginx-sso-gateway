@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class UniversalAuth
 {
+    private bool $isAuthenticated;
+
     /**
      * Handle an incoming request.
      *
@@ -18,20 +20,32 @@ final class UniversalAuth
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $isAuthenticated = Auth::check() || $request->hasCookie(Auth::getRecallerName());
+        $this->isAuthenticated = Auth::check() || $request->hasCookie(Auth::getRecallerName());
 
-        if (! $isAuthenticated) {
-            if (! $request->routeIs('login')) {
-                $returnTo = $request->fullUrl();
-
-                return redirect()->route('login', ['return_to' => $returnTo]);
-            }
-
-            return $next($request);
+        if(!$this->isAuthenticated) {
+            return $this->isNotAuthenticated($request, $next, $this->isAuthenticated);
         }
 
-        if ($request->routeIs('login')) {
-            return redirect()->route('dashboard');
+        return $this->isAuthenticated($request, $next, $this->isAuthenticated);
+    }
+
+    private function isAuthenticated(Request $request, Closure $next, bool $isAuthenticated): Response
+    {
+        if($isAuthenticated) {
+            if ($request->routeIs('login')) {
+                return redirect()->route('dashboard');
+            }
+        }
+
+        return $next($request);
+    }
+
+    private function isNotAuthenticated(Request $request, Closure $next, bool $isAuthenticated): Response
+    {
+        if (! $isAuthenticated) {
+            if (! $request->routeIs('login')) {
+                return redirect()->route('login', ['return_to' => $request->fullUrl()]);
+            }
         }
 
         return $next($request);
