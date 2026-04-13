@@ -371,10 +371,6 @@ Configurado com o preset `laravel` e regras adicionais em `pint.json`. Principai
 
 Configurado em `eslint.config.js` com os plugins `eslint-plugin-vue`, `typescript-eslint` e `@stylistic/eslint-plugin`. Formatação gerenciada pelo Prettier com `prettier-plugin-tailwindcss`.
 
-### SonarQube
-
-O projeto é monitorado pelo SonarQube. O badge de qualidade no topo deste README reflete o status atual do Quality Gate.
-
 ---
 
 ## Deploy e Nginx
