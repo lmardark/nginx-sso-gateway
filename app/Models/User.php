@@ -12,7 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 /**
  * @property int $id
- * @property string #nickname
+ * @property string $nickname
  * @property string $username
  * @property string $password
  * @property bool $is_admin
