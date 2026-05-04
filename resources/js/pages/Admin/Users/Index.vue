@@ -98,7 +98,7 @@ function logout() {
                 <div class="h-4 w-px bg-[#e3e3e0] dark:bg-[#3E3E3A]"></div>
 
                 <span class="text-sm text-[#706f6c] dark:text-[#A1A09A]">
-                    {{ auth.user.username }}
+                    {{ auth.user.nickname ? `${auth.user.nickname} (${auth.user.username})` : auth.user.username }} 
                 </span>
                 <button
                     type="button"
@@ -183,6 +183,9 @@ function logout() {
                                 <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#706f6c] dark:text-[#A1A09A]">
                                     Usuário
                                 </th>
+                                <th v-if="filteredUsers" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#706f6c] dark:text-[#A1A09A]">
+                                    Apelido 
+                                </th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#706f6c] dark:text-[#A1A09A]">
                                     Criado em
                                 </th>
@@ -212,6 +215,9 @@ function logout() {
                                             você
                                         </span>
                                     </div>
+                                </td>
+                                <td class="px-6 py-4 text-[#706f6c] dark:text-[#A1A09A]">
+                                    {{ auth.user.nickname ?? 'Não possui um Apelido definido.' }} 
                                 </td>
                                 <td class="px-6 py-4 text-[#706f6c] dark:text-[#A1A09A]">
                                     {{ formatDate(user.created_at) }}
