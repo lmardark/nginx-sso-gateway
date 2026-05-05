@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
+import AppHeader from '@/components/AppHeader.vue';
+import ActionCard from '@/components/ActionCard.vue';
 
 defineProps<{
     auth: {
@@ -10,67 +12,13 @@ defineProps<{
         };
     };
 }>();
-
-function logout() {
-    router.post('/logout');
-}
 </script>
 
 <template>
     <Head title="Página Inícial" />
 
     <div class="flex min-h-screen flex-col bg-[#FDFDFC] text-[#1b1b18] dark:bg-[#0a0a0a]">
-        <!-- Header -->
-        <header
-            class="flex items-center justify-between border-b border-[#e3e3e0] bg-white px-6 py-4 shadow-sm dark:border-[#3E3E3A] dark:bg-[#161615]"
-        >
-            <a href="/home" class="flex items-center gap-3">
-                <svg
-                    class="h-6 text-[#F53003] dark:text-[#FF4433]"
-                    viewBox="0 0 53 54"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                >
-                    <path
-                        d="M23.5 2.5C23.5 1.4 24.4 0.5 25.5 0.5H35.5C40.5 0.5 44.5 4.5 44.5 9.5V19.5C44.5 20.6 43.6 21.5 42.5 21.5H32.5C27.5 21.5 23.5 17.5 23.5 12.5V2.5Z"
-                        fill="currentColor"
-                    />
-                    <path
-                        d="M0.5 29.5C0.5 28.4 1.4 27.5 2.5 27.5H12.5C17.5 27.5 21.5 31.5 21.5 36.5V46.5C21.5 47.6 20.6 48.5 19.5 48.5H9.5C4.5 48.5 0.5 44.5 0.5 39.5V29.5Z"
-                        fill="currentColor"
-                    />
-                    <path
-                        d="M0.5 2.5C0.5 1.4 1.4 0.5 2.5 0.5H12.5C13.6 0.5 14.5 1.4 14.5 2.5V21.5H2.5C1.4 21.5 0.5 20.6 0.5 19.5V2.5Z"
-                        fill="currentColor"
-                    />
-                    <path
-                        d="M23.5 32.5C23.5 31.4 24.4 30.5 25.5 30.5H44.5C45.6 30.5 46.5 31.4 46.5 32.5V46.5C46.5 47.6 45.6 48.5 44.5 48.5H25.5C24.4 48.5 23.5 47.6 23.5 46.5V32.5Z"
-                        fill="currentColor"
-                    />
-                </svg>
-                <span class="text-sm font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">
-                    Sistema de Autenticação
-                </span>
-            </a>
-
-            <div class="flex items-center gap-4">
-                <div class="h-4 w-px bg-[#e3e3e0] dark:bg-[#3E3E3A]"></div>
-
-                <span class="text-sm text-[#706f6c] dark:text-[#A1A09A]">
-                    {{ auth.user.nickname ? `${auth.user.nickname} (${auth.user.username})` : auth.user.username }} 
-                </span>
-
-                <div class="h-4 w-px bg-[#e3e3e0] dark:bg-[#3E3E3A]"></div>
-
-                <button
-                    type="button"
-                    class="rounded-sm border border-[#e3e3e0] bg-white px-4 py-1.5 text-sm font-medium text-[#1b1b18] transition hover:bg-[#f5f5f3] dark:border-[#3E3E3A] dark:bg-[#161615] dark:text-[#EDEDEC] dark:hover:bg-[#1e1e1c]"
-                    @click="logout"
-                >
-                    Deslogar
-                </button>
-            </div>
-        </header>
+        <AppHeader :user="auth.user" />
 
         <!-- Content -->
         <main class="flex-1 p-6">
@@ -96,10 +44,10 @@ function logout() {
                                 <p class="text-sm font-medium text-[#1b1b18] dark:text-[#EDEDEC]">Sessão ativa</p>
                                 <p class="text-xs text-[#706f6c] dark:text-[#A1A09A]">Autenticado com sucesso</p>
                             </div>
-                            <div class="flex gap-3 ml-auto">
+                            <div class="ml-auto flex gap-3">
                                 <span class="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900 dark:text-green-400">
                                     <span class="h-1.5 w-1.5 animate-ping rounded-full bg-green-500"></span>
-                                    <span class="h-1.5 w-1.5 rounded-full bg-green-500 absolute"></span>
+                                    <span class="absolute h-1.5 w-1.5 rounded-full bg-green-500"></span>
                                     Online
                                 </span>
                             </div>
@@ -122,18 +70,13 @@ function logout() {
                         </div>
                     </div>
                 </div>
+
                 <div>
-                    <div
-                        class="my-8"
-                    >
+                    <div class="my-8">
                         <h1 class="text-2xl font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">
                             Ações do
-                            <span v-if="auth.user.is_admin">
-                                Administrador
-                            </span>
-                            <span v-else>
-                                Usuário
-                            </span>
+                            <span v-if="auth.user.is_admin">Administrador</span>
+                            <span v-else>Usuário</span>
                         </h1>
                         <p v-if="auth.user.is_admin" class="mt-1 text-sm text-[#706f6c] dark:text-[#A1A09A]">
                             Configure, audite e personalize o sistema por completo.
@@ -144,127 +87,55 @@ function logout() {
                     </div>
 
                     <div class="grid grid-cols-1 gap-10 sm:grid-cols-2">
-                        <!-- Auditoria -->
-                        <a
+                        <ActionCard
                             href="/admin/users"
-                            class="group rounded-lg bg-white p-6 shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] transition hover:bg-[#f9f9f8] dark:bg-[#161615] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d] dark:hover:bg-[#1a1a18]"
+                            title="Auditoria"
+                            description="Monitoramento geral da aplicação."
                         >
-                            <div class="mb-4 flex items-center justify-between">
-                                <div class="flex h-9 w-9 items-center justify-center rounded-full bg-[#f5f5f3] dark:bg-[#1e1e1c]">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#706f6c] dark:text-[#A1A09A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                                    </svg>
-                                </div>
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-4 w-4 text-[#b5b3ad] transition group-hover:translate-x-0.5 dark:text-[#55544f]"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                >
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                            <template #icon>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#706f6c] dark:text-[#A1A09A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                                 </svg>
-                            </div>
-                            <p class="text-sm font-medium text-[#1b1b18] dark:text-[#EDEDEC]">
-                                Auditoria
-                            </p>
-                            <p class="mt-0.5 text-xs text-[#706f6c] dark:text-[#A1A09A]">
-                                Monitoramento geral da aplicação.
-                            </p>
-                        </a>
+                            </template>
+                        </ActionCard>
 
-                        <!-- Gerenciar usuários (admin) -->
-                        <a
+                        <ActionCard
                             v-if="auth.user.is_admin"
                             href="/admin/users"
-                            class="group rounded-lg bg-white p-6 shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] transition hover:bg-[#f9f9f8] dark:bg-[#161615] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d] dark:hover:bg-[#1a1a18]"
+                            title="Gerenciar usuários"
+                            description="Criar, editar e remover usuários do sistema."
                         >
-                            <div class="mb-4 flex items-center justify-between">
-                                <div class="flex h-9 w-9 items-center justify-center rounded-full bg-[#f5f5f3] dark:bg-[#1e1e1c]">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#706f6c] dark:text-[#A1A09A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                </div>
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-4 w-4 text-[#b5b3ad] transition group-hover:translate-x-0.5 dark:text-[#55544f]"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                >
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                            <template #icon>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#706f6c] dark:text-[#A1A09A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                            </div>
-                            <p class="text-sm font-medium text-[#1b1b18] dark:text-[#EDEDEC]">
-                                Gerenciar usuários
-                            </p>
-                            <p class="mt-0.5 text-xs text-[#706f6c] dark:text-[#A1A09A]">
-                                Criar, editar e remover usuários do sistema.
-                            </p>
-                        </a>
+                            </template>
+                        </ActionCard>
 
-                        <!-- Personalizar aplicação (admin) -->
-                        <a
+                        <ActionCard
                             v-if="auth.user.is_admin"
                             href="/admin/users"
-                            class="group rounded-lg bg-white p-6 shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] transition hover:bg-[#f9f9f8] dark:bg-[#161615] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d] dark:hover:bg-[#1a1a18]"
+                            title="Personalizar aplicação"
+                            description="Alterar aparência global do sistema."
                         >
-                            <div class="mb-4 flex items-center justify-between">
-                                <div class="flex h-9 w-9 items-center justify-center rounded-full bg-[#f5f5f3] dark:bg-[#1e1e1c]">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#706f6c] dark:text-[#A1A09A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                                    </svg>
-                                </div>
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-4 w-4 text-[#b5b3ad] transition group-hover:translate-x-0.5 dark:text-[#55544f]"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                >
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                            <template #icon>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#706f6c] dark:text-[#A1A09A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                                 </svg>
-                            </div>
-                            <p class="text-sm font-medium text-[#1b1b18] dark:text-[#EDEDEC]">
-                                Personalizar aplicação
-                            </p>
-                            <p class="mt-0.5 text-xs text-[#706f6c] dark:text-[#A1A09A]">
-                                Alterar aparência global do sistema.
-                            </p>
-                        </a>
+                            </template>
+                        </ActionCard>
 
-                        <!-- Configurar perfil -->
-                        <a
+                        <ActionCard
                             href="/admin/users"
-                            class="group rounded-lg bg-white p-6 shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] transition hover:bg-[#f9f9f8] dark:bg-[#161615] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d] dark:hover:bg-[#1a1a18]"
+                            title="Configurar perfil"
+                            description="Configure e personalize o seu perfil."
                         >
-                            <div class="mb-4 flex items-center justify-between">
-                                <div class="flex h-9 w-9 items-center justify-center rounded-full bg-[#f5f5f3] dark:bg-[#1e1e1c]">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#706f6c] dark:text-[#A1A09A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-4 w-4 text-[#b5b3ad] transition group-hover:translate-x-0.5 dark:text-[#55544f]"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                >
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                            <template #icon>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#706f6c] dark:text-[#A1A09A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                            </div>
-                            <p class="text-sm font-medium text-[#1b1b18] dark:text-[#EDEDEC]">
-                                Configurar perfil
-                            </p>
-                            <p class="mt-0.5 text-xs text-[#706f6c] dark:text-[#A1A09A]">
-                                Configure e personalize o seu perfil.
-                            </p>
-                        </a>
+                            </template>
+                        </ActionCard>
                     </div>
                 </div>
             </div>

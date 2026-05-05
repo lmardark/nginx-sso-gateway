@@ -96,6 +96,11 @@ The frontend is **Inertia.js + Vue 3 + TypeScript + Tailwind CSS 4**. There is n
 ```
 resources/js/
 ├── app.ts                    # Inertia app bootstrap
+├── components/               # Reusable Vue components
+│   ├── AppLogo.vue           # Brand SVG logo (use class="h-6" or "h-8" to set size)
+│   ├── AppHeader.vue         # Authenticated header: logo + username + logout
+│   ├── PasswordInput.vue     # Password field with show/hide toggle (v-model compatible)
+│   └── ActionCard.vue        # Linked card with icon slot, title, description
 ├── pages/                    # One Vue component per route
 │   ├── Auth/Login.vue
 │   ├── Admin/Setup.vue
@@ -108,6 +113,15 @@ resources/js/
 │   └── global.d.ts
 └── wayfinder/index.ts        # Wayfinder runtime (queryParams, setUrlDefaults, etc.)
 ```
+
+#### Component API reference
+
+| Component | Key props | Notes |
+|-----------|-----------|-------|
+| `AppLogo` | — | Pass `class="h-6"` or `class="h-8"` for size |
+| `AppHeader` | `user: { username, nickname? }` | Handles logout internally via `router.post('/logout')` |
+| `PasswordInput` | `id`, `label`, `modelValue`, `error?`, `required?`, `autocomplete?` | Emits `update:modelValue`; use `:model-value` + `@update:model-value` with Inertia `useForm` |
+| `ActionCard` | `href`, `title`, `description` | Named slot `#icon` for the SVG icon |
 
 ### Key Routes
 

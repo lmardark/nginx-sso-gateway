@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
+import AppHeader from '@/components/AppHeader.vue';
 
 const props = defineProps<{
     auth: {
         user: {
             username: string;
+            nickname?: string;
         };
     };
     users: Array<{
         id: number;
         username: string;
+        nickname?: string;
         created_at: string;
     }>;
 }>();
@@ -48,67 +51,13 @@ function deleteUser() {
         onFinish: () => (confirmDeleteId.value = null),
     });
 }
-
-function logout() {
-    router.post('/logout');
-}
 </script>
 
 <template>
     <Head title="Gerenciar Usuários" />
 
     <div class="flex min-h-screen flex-col bg-[#FDFDFC] text-[#1b1b18] dark:bg-[#0a0a0a]">
-        <!-- Header -->
-        <header
-            class="flex items-center justify-between border-b border-[#e3e3e0] bg-white px-6 py-4 shadow-sm dark:border-[#3E3E3A] dark:bg-[#161615]"
-        >
-            <a href="/home" class="flex items-center gap-3">
-                <svg
-                    class="h-6 text-[#F53003] dark:text-[#FF4433]"
-                    viewBox="0 0 53 54"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                >
-                    <path
-                        d="M23.5 2.5C23.5 1.4 24.4 0.5 25.5 0.5H35.5C40.5 0.5 44.5 4.5 44.5 9.5V19.5C44.5 20.6 43.6 21.5 42.5 21.5H32.5C27.5 21.5 23.5 17.5 23.5 12.5V2.5Z"
-                        fill="currentColor"
-                    />
-                    <path
-                        d="M0.5 29.5C0.5 28.4 1.4 27.5 2.5 27.5H12.5C17.5 27.5 21.5 31.5 21.5 36.5V46.5C21.5 47.6 20.6 48.5 19.5 48.5H9.5C4.5 48.5 0.5 44.5 0.5 39.5V29.5Z"
-                        fill="currentColor"
-                    />
-                    <path
-                        d="M0.5 2.5C0.5 1.4 1.4 0.5 2.5 0.5H12.5C13.6 0.5 14.5 1.4 14.5 2.5V21.5H2.5C1.4 21.5 0.5 20.6 0.5 19.5V2.5Z"
-                        fill="currentColor"
-                    />
-                    <path
-                        d="M23.5 32.5C23.5 31.4 24.4 30.5 25.5 30.5H44.5C45.6 30.5 46.5 31.4 46.5 32.5V46.5C46.5 47.6 45.6 48.5 44.5 48.5H25.5C24.4 48.5 23.5 47.6 23.5 46.5V32.5Z"
-                        fill="currentColor"
-                    />
-                </svg>
-                <span class="text-sm font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">
-                    Sistema de Autenticação
-                </span>
-            </a>
-
-            <div class="flex items-center gap-4">
-                <div class="h-4 w-px bg-[#e3e3e0] dark:bg-[#3E3E3A]"></div>
-
-                <span class="text-sm text-[#706f6c] dark:text-[#A1A09A]">
-                    {{ auth.user.nickname ? `${auth.user.nickname} (${auth.user.username})` : auth.user.username }} 
-                </span>
-
-                <div class="h-4 w-px bg-[#e3e3e0] dark:bg-[#3E3E3A]"></div>
-
-                <button
-                    type="button"
-                    class="rounded-sm border border-[#e3e3e0] bg-white px-4 py-1.5 text-sm font-medium text-[#1b1b18] transition hover:bg-[#f5f5f3] dark:border-[#3E3E3A] dark:bg-[#161615] dark:text-[#EDEDEC] dark:hover:bg-[#1e1e1c]"
-                    @click="logout"
-                >
-                    Deslogar
-                </button>
-            </div>
-        </header>
+        <AppHeader :user="auth.user" />
 
         <!-- Content -->
         <main class="flex-1 p-6">
@@ -183,8 +132,8 @@ function logout() {
                                 <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#706f6c] dark:text-[#A1A09A]">
                                     Usuário
                                 </th>
-                                <th v-if="filteredUsers" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#706f6c] dark:text-[#A1A09A]">
-                                    Apelido 
+                                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#706f6c] dark:text-[#A1A09A]">
+                                    Apelido
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#706f6c] dark:text-[#A1A09A]">
                                     Criado em
@@ -217,7 +166,7 @@ function logout() {
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-[#706f6c] dark:text-[#A1A09A]">
-                                    {{ auth.user.nickname ?? 'Não possui um Apelido definido.' }} 
+                                    {{ user.nickname ?? 'Não definido' }}
                                 </td>
                                 <td class="px-6 py-4 text-[#706f6c] dark:text-[#A1A09A]">
                                     {{ formatDate(user.created_at) }}
