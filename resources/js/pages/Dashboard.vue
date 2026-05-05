@@ -54,19 +54,13 @@ function logout() {
             </div>
 
             <div class="flex items-center gap-4">
+                <div class="h-4 w-px bg-[#e3e3e0] dark:bg-[#3E3E3A]"></div>
                 <nav class="flex items-center gap-1 text-sm">
                     <a
                         href="/dashboard"
                         class="rounded-sm bg-[#f5f5f3] px-3 py-1.5 font-medium text-[#1b1b18] dark:bg-[#1e1e1c] dark:text-[#EDEDEC]"
                     >
                         Dashboard
-                    </a>
-                    <a 
-                        v-if="auth.user.username.startsWith('admin_')"
-                        href="/admin/users"
-                        class="rounded-sm px-3 py-1.5 text-[#706f6c] transition hover:bg-[#f5f5f3] hover:text-[#1b1b18] dark:text-[#A1A09A] dark:hover:bg-[#1e1e1c] dark:hover:text-[#EDEDEC]"
-                    >
-                        Usuários
                     </a>
                 </nav>
 
