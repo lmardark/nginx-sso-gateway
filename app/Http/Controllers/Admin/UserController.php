@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -17,7 +19,7 @@ final class UserController extends Controller
     {
         return Inertia::render('Admin/Users/Index', [
             'users' => User::query()->orderBy('created_at', 'desc')
-                ->get(['id', 'username', 'created_at']),
+                ->get(['id', 'username', 'nickname', 'created_at']),
         ]);
     }
 
@@ -33,7 +35,14 @@ final class UserController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        User::query()->create($validated);
+        $user = User::query()->create($validated);
+
+        ActivityLog::create([
+            'actor_id' => Auth::id(),
+            'event' => 'user_created',
+            'target_username' => $user->username,
+            'ip_address' => $request->ip(),
+        ]);
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuário criado com sucesso.');
@@ -61,13 +70,28 @@ final class UserController extends Controller
 
         $user->save();
 
+        ActivityLog::create([
+            'actor_id' => Auth::id(),
+            'event' => 'user_updated',
+            'target_username' => $user->username,
+            'ip_address' => $request->ip(),
+        ]);
+
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuário atualizado com sucesso.');
     }
 
-    public function destroy(User $user): RedirectResponse
+    public function destroy(Request $request, User $user): RedirectResponse
     {
+        $username = $user->username;
         $user->delete();
+
+        ActivityLog::create([
+            'actor_id' => Auth::id(),
+            'event' => 'user_deleted',
+            'target_username' => $username,
+            'ip_address' => $request->ip(),
+        ]);
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuário removido com sucesso.');

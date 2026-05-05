@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Admin\AuditController;
 use App\Http\Controllers\Admin\SetupController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-if (!defined('LOGIN_PATH')) {
+if (! defined('LOGIN_PATH')) {
     define('LOGIN_PATH', '/login');
 }
 
@@ -31,8 +34,20 @@ Route::middleware(['universal.auth'])->group(function () {
     Route::inertia(LOGIN_PATH, 'Auth/Login')->name('login');
     Route::inertia('/home', 'Home')->name('home');
 
-    // Admin - gerenciamento de usuários (apenas admins)
+    // Perfil do usuário autenticado
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    // Admin
     Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
+        // Auditoria
+        Route::get('/audit', [AuditController::class, 'index'])->name('audit.index');
+
+        // Configurações da página de login
+        Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
+        Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+
+        // Gerenciamento de usuários
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');

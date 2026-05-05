@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\ActivityLog;
 use App\Services\Auth\AuthService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -26,6 +27,13 @@ final class AuthController extends Controller
         if ($isAuthenticated) {
             $request->session()->regenerate();
 
+            ActivityLog::create([
+                'actor_id' => Auth::id(),
+                'event' => 'login_success',
+                'target_username' => Auth::user()?->username,
+                'ip_address' => $request->ip(),
+            ]);
+
             $url = $request->input('return_to')
                            ?? session()->pull('url.intended')
                            ?? route('home');
@@ -40,6 +48,13 @@ final class AuthController extends Controller
             return redirect()->away($destination);
         }
 
+        ActivityLog::create([
+            'actor_id' => null,
+            'event' => 'login_failed',
+            'target_username' => $request->input('username'),
+            'ip_address' => $request->ip(),
+        ]);
+
         return back()->withErrors([
             'username' => 'Usuário ou senha incorretos.',
         ]);
@@ -47,10 +62,20 @@ final class AuthController extends Controller
 
     public function logout(): RedirectResponse
     {
+        $username = Auth::user()?->username;
+        $actorId = Auth::id();
+
         Auth::logout();
 
         request()->session()->invalidate();
         request()->session()->regenerateToken();
+
+        ActivityLog::create([
+            'actor_id' => $actorId,
+            'event' => 'logout',
+            'target_username' => $username,
+            'ip_address' => request()->ip(),
+        ]);
 
         return redirect()->route('login');
     }

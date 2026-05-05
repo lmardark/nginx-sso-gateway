@@ -1,7 +1,18 @@
 <script setup lang="ts">
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { onMounted, onBeforeUnmount } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
+
+type LoginSettings = {
+    app_name: string;
+    show_logo: boolean;
+    primary_color: string;
+    custom_css: string;
+};
+
+const page = usePage<{ settings: { login: LoginSettings } }>();
+const settings = page.props.settings?.login;
 
 const form = useForm({
     username: '',
@@ -14,6 +25,20 @@ function submit() {
         onFinish: () => form.reset('password'),
     });
 }
+
+let styleEl: HTMLStyleElement | null = null;
+
+onMounted(() => {
+    if (settings?.custom_css) {
+        styleEl = document.createElement('style');
+        styleEl.textContent = settings.custom_css;
+        document.head.appendChild(styleEl);
+    }
+});
+
+onBeforeUnmount(() => {
+    styleEl?.remove();
+});
 </script>
 
 <template>
@@ -22,14 +47,17 @@ function submit() {
     <div class="flex min-h-screen flex-col items-center justify-center bg-[#FDFDFC] p-6 text-[#1b1b18] dark:bg-[#0a0a0a]">
         <div class="w-full max-w-md">
             <!-- Logo -->
-            <div class="mb-8 flex justify-center">
-                <AppLogo class="h-8" />
+            <div v-if="settings?.show_logo !== false" class="mb-8 flex justify-center">
+                <AppLogo
+                    class="h-8"
+                    :style="{ color: settings?.primary_color ?? '#F53003' }"
+                />
             </div>
 
             <!-- Card -->
             <div class="rounded-lg bg-white px-8 py-10 shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:bg-[#161615] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]">
                 <h1 class="mb-1 text-center text-xl font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">
-                    Sistema de Autenticação
+                    {{ settings?.app_name ?? 'Sistema de Autenticação' }}
                 </h1>
                 <p class="mb-6 text-center text-sm text-[#706f6c] dark:text-[#A1A09A]">
                     Entre com sua conta para continuar

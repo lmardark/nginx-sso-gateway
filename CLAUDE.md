@@ -73,17 +73,45 @@ The `return_to` host is validated against `ALLOWED_HOST_REDIRECT` (env var → `
 app/
 ├── Http/
 │   ├── Controllers/
-│   │   ├── Admin/SetupController.php    # First-run admin setup
-│   │   ├── Admin/UserController.php     # User CRUD (admin only)
-│   │   └── Auth/AuthController.php      # Login / logout
+│   │   ├── Admin/AuditController.php     # Activity log listing (admin only)
+│   │   ├── Admin/SetupController.php     # First-run admin setup
+│   │   ├── Admin/SettingsController.php  # Login page customization (admin only)
+│   │   ├── Admin/UserController.php      # User CRUD (admin only)
+│   │   ├── Auth/AuthController.php       # Login / logout
+│   │   └── ProfileController.php         # Authenticated user's own profile
 │   ├── Middleware/
 │   │   ├── CheckFirstSetup.php
 │   │   ├── UniversalAuth.php
 │   │   └── EnsureIsAdmin.php
 │   └── Requests/Auth/LoginRequest.php
-├── Models/User.php                      # username (unique), nickname, password (hashed), is_admin
+├── Models/
+│   ├── ActivityLog.php  # Immutable event log (actor_id, event, target_username, ip_address)
+│   ├── Setting.php      # Key-value settings store; use Setting::loginSettings() to read all login settings at once
+│   └── User.php         # username (unique), nickname, password (hashed), is_admin
 └── Services/Auth/AuthService.php        # Wraps Auth::attempt()
 ```
+
+#### Activity log events
+
+| Event | Logged by |
+|-------|-----------|
+| `login_success` | AuthController |
+| `login_failed` | AuthController |
+| `logout` | AuthController |
+| `user_created` | UserController |
+| `user_updated` | UserController |
+| `user_deleted` | UserController |
+
+#### Login page settings (stored in `settings` table)
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `login_app_name` | `Sistema de Autenticação` | Title shown on login page |
+| `login_show_logo` | `1` | Toggle logo visibility (`1`/`0`) |
+| `login_primary_color` | `#F53003` | Logo color (hex) |
+| `login_custom_css` | `""` | CSS injected only on the login page |
+
+Settings are shared globally via `HandleInertiaRequests` under `settings.login`. The `Login.vue` reads them via `usePage()`. Custom CSS is injected programmatically via `onMounted` (not via `<style>` tag) to avoid HTML encoding issues.
 
 Authentication uses `username` (not email). The `User` model uses PHP 8 attribute-based `#[Fillable]` and `#[Hidden]` instead of array properties.
 
@@ -131,6 +159,9 @@ resources/js/
 | `GET/POST` | `/login` | — |
 | `GET/POST` | `/setup` | — (only when no users exist) |
 | `GET` | `/home` | Required |
+| `GET/PUT` | `/profile` | Required |
+| `GET` | `/admin/audit` | Required + is_admin |
+| `GET/PUT` | `/admin/settings` | Required + is_admin |
 | `GET/POST/PUT/DELETE` | `/admin/users*` | Required + is_admin |
 
 ### PHP Code Conventions (enforced by Pint)

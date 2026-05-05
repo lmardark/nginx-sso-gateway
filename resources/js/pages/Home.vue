@@ -88,7 +88,7 @@ defineProps<{
 
                     <div class="grid grid-cols-1 gap-10 sm:grid-cols-2">
                         <ActionCard
-                            href="/admin/users"
+                            href="/admin/audit"
                             title="Auditoria"
                             description="Monitoramento geral da aplicação."
                         >
@@ -114,9 +114,9 @@ defineProps<{
 
                         <ActionCard
                             v-if="auth.user.is_admin"
-                            href="/admin/users"
-                            title="Personalizar aplicação"
-                            description="Alterar aparência global do sistema."
+                            href="/admin/settings"
+                            title="Personalizar login"
+                            description="Alterar aparência da página de login do SSO."
                         >
                             <template #icon>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#706f6c] dark:text-[#A1A09A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -126,7 +126,7 @@ defineProps<{
                         </ActionCard>
 
                         <ActionCard
-                            href="/admin/users"
+                            href="/profile"
                             title="Configurar perfil"
                             description="Configure e personalize o seu perfil."
                         >

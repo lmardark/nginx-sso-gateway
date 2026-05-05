@@ -1,0 +1,204 @@
+<script setup lang="ts">
+import { Head } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import AppHeader from '@/components/AppHeader.vue';
+
+type LogEntry = {
+    id: number;
+    actor_id: number | null;
+    event: string;
+    target_username: string | null;
+    ip_address: string | null;
+    created_at: string;
+    actor: { id: number; username: string; nickname?: string } | null;
+};
+
+const props = defineProps<{
+    auth: {
+        user: {
+            username: string;
+            nickname?: string;
+            is_admin: boolean;
+        };
+    };
+    logs: LogEntry[];
+}>();
+
+const search = ref('');
+const filterEvent = ref('');
+
+const eventLabels: Record<string, string> = {
+    login_success: 'Login realizado',
+    login_failed:  'Login falhou',
+    logout:        'Logout',
+    user_created:  'Usuário criado',
+    user_updated:  'Usuário atualizado',
+    user_deleted:  'Usuário excluído',
+};
+
+const eventColors: Record<string, string> = {
+    login_success: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400',
+    login_failed:  'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-400',
+    logout:        'bg-[#f5f5f3] text-[#706f6c] dark:bg-[#1e1e1c] dark:text-[#A1A09A]',
+    user_created:  'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-400',
+    user_updated:  'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-400',
+    user_deleted:  'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-400',
+};
+
+const uniqueEvents = computed(() => [...new Set(props.logs.map((l) => l.event))]);
+
+const filteredLogs = computed(() => {
+    return props.logs.filter((log) => {
+        const matchesEvent = filterEvent.value === '' || log.event === filterEvent.value;
+        const term = search.value.toLowerCase();
+        const matchesSearch =
+            term === '' ||
+            (log.actor?.username ?? '').toLowerCase().includes(term) ||
+            (log.target_username ?? '').toLowerCase().includes(term) ||
+            (log.ip_address ?? '').includes(term);
+        return matchesEvent && matchesSearch;
+    });
+});
+
+function formatDate(dateStr: string): string {
+    return new Date(dateStr).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    });
+}
+
+function actorDisplay(log: LogEntry): string {
+    if (log.actor) {
+        return log.actor.nickname
+            ? `${log.actor.nickname} (${log.actor.username})`
+            : log.actor.username;
+    }
+    return log.event === 'login_failed' ? '—' : 'Usuário excluído';
+}
+</script>
+
+<template>
+    <Head title="Auditoria" />
+
+    <div class="flex min-h-screen flex-col bg-[#FDFDFC] text-[#1b1b18] dark:bg-[#0a0a0a]">
+        <AppHeader :user="auth.user" />
+
+        <main class="flex-1 p-6">
+            <div class="mx-auto max-w-6xl">
+                <!-- Page header -->
+                <div class="mb-6 flex items-center justify-between">
+                    <div>
+                        <div class="mb-1 flex items-center gap-2">
+                            <a
+                                href="/home"
+                                class="flex items-center gap-1.5 text-sm text-[#706f6c] transition hover:text-[#1b1b18] dark:text-[#A1A09A] dark:hover:text-[#EDEDEC]"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                                </svg>
+                                Voltar
+                            </a>
+                        </div>
+                        <h1 class="text-2xl font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">Auditoria</h1>
+                        <p class="mt-1 text-sm text-[#706f6c] dark:text-[#A1A09A]">
+                            Últimos {{ logs.length }} eventos registrados no sistema.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="mb-4 flex flex-col gap-3 sm:flex-row">
+                    <!-- Search -->
+                    <div class="relative flex-1">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#b5b3ad] dark:text-[#55544f]"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                        >
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input
+                            v-model="search"
+                            type="text"
+                            placeholder="Buscar por usuário ou IP..."
+                            class="w-full rounded-sm border border-[#e3e3e0] bg-[#FDFDFC] py-2 pl-9 pr-3 text-sm text-[#1b1b18] outline-none transition placeholder:text-[#b5b3ad] focus:border-[#1b1b18] focus:ring-1 focus:ring-[#1b1b18] dark:border-[#3E3E3A] dark:bg-[#1a1a18] dark:text-[#EDEDEC] dark:placeholder:text-[#55544f] dark:focus:border-[#EDEDEC] dark:focus:ring-[#EDEDEC]"
+                        />
+                    </div>
+                    <!-- Event filter -->
+                    <select
+                        v-model="filterEvent"
+                        class="rounded-sm border border-[#e3e3e0] bg-[#FDFDFC] px-3 py-2 text-sm text-[#1b1b18] outline-none transition focus:border-[#1b1b18] focus:ring-1 focus:ring-[#1b1b18] dark:border-[#3E3E3A] dark:bg-[#1a1a18] dark:text-[#EDEDEC] dark:focus:border-[#EDEDEC] dark:focus:ring-[#EDEDEC]"
+                    >
+                        <option value="">Todos os eventos</option>
+                        <option v-for="evt in uniqueEvents" :key="evt" :value="evt">
+                            {{ eventLabels[evt] ?? evt }}
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Table -->
+                <div class="overflow-hidden rounded-lg shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]">
+                    <!-- Empty state -->
+                    <div
+                        v-if="filteredLogs.length === 0"
+                        class="flex flex-col items-center justify-center bg-white py-16 dark:bg-[#161615]"
+                    >
+                        <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#f5f5f3] dark:bg-[#1e1e1c]">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#706f6c] dark:text-[#A1A09A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                        </div>
+                        <p class="text-sm font-medium text-[#1b1b18] dark:text-[#EDEDEC]">Nenhum evento encontrado</p>
+                        <p class="mt-1 text-xs text-[#706f6c] dark:text-[#A1A09A]">Ajuste os filtros ou aguarde novos registros.</p>
+                    </div>
+
+                    <div v-else class="overflow-x-auto">
+                        <table class="w-full bg-white text-sm dark:bg-[#161615]">
+                            <thead>
+                                <tr class="border-b border-[#e3e3e0] dark:border-[#3E3E3A]">
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#706f6c] dark:text-[#A1A09A]">Data</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#706f6c] dark:text-[#A1A09A]">Evento</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#706f6c] dark:text-[#A1A09A]">Autor</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#706f6c] dark:text-[#A1A09A]">Alvo</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#706f6c] dark:text-[#A1A09A]">IP</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#e3e3e0] dark:divide-[#3E3E3A]">
+                                <tr
+                                    v-for="log in filteredLogs"
+                                    :key="log.id"
+                                    class="transition hover:bg-[#f9f9f8] dark:hover:bg-[#1a1a18]"
+                                >
+                                    <td class="whitespace-nowrap px-6 py-3.5 text-xs text-[#706f6c] dark:text-[#A1A09A]">
+                                        {{ formatDate(log.created_at) }}
+                                    </td>
+                                    <td class="px-6 py-3.5">
+                                        <span
+                                            class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                                            :class="eventColors[log.event] ?? 'bg-[#f5f5f3] text-[#706f6c] dark:bg-[#1e1e1c] dark:text-[#A1A09A]'"
+                                        >
+                                            {{ eventLabels[log.event] ?? log.event }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-3.5 text-sm text-[#1b1b18] dark:text-[#EDEDEC]">
+                                        {{ actorDisplay(log) }}
+                                    </td>
+                                    <td class="px-6 py-3.5 text-sm text-[#706f6c] dark:text-[#A1A09A]">
+                                        {{ log.target_username ?? '—' }}
+                                    </td>
+                                    <td class="whitespace-nowrap px-6 py-3.5 font-mono text-xs text-[#706f6c] dark:text-[#A1A09A]">
+                                        {{ log.ip_address ?? '—' }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</template>
