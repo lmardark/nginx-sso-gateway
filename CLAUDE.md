@@ -108,10 +108,14 @@ app/
 |-----|---------|-------------|
 | `login_app_name` | `Sistema de Autenticação` | Title shown on login page |
 | `login_show_logo` | `1` | Toggle logo visibility (`1`/`0`) |
-| `login_primary_color` | `#F53003` | Logo color (hex) |
+| `login_primary_color` | `#F53003` | SVG logo color (hex) |
 | `login_custom_css` | `""` | CSS injected only on the login page |
+| `login_logo_path` | `null` | Path in `storage/app/public/logos/` for custom logo image |
+| `login_bg_color` | `""` | Login page background color (hex); falls back to `#FDFDFC` when empty |
 
 Settings are shared globally via `HandleInertiaRequests` under `settings.login`. The `Login.vue` reads them via `usePage()`. Custom CSS is injected programmatically via `onMounted` (not via `<style>` tag) to avoid HTML encoding issues.
+
+`Setting::loginSettings()` converts `login_logo_path` to a public URL via `Storage::disk('public')->url()` and returns it as `logo_url`. When a custom logo image exists, `Login.vue` renders an `<img>` instead of the SVG `AppLogo`. Logo files are stored in `storage/app/public/logos/` and served via the `public/storage` symlink (created by `composer run setup` → `php artisan storage:link`).
 
 Authentication uses `username` (not email). The `User` model uses PHP 8 attribute-based `#[Fillable]` and `#[Hidden]` instead of array properties.
 
@@ -192,7 +196,7 @@ resources/js/
 |-----|------|-------------|
 | `auth.user` | `{ username, nickname?, is_admin }` or `null` | Authenticated user |
 | `flash.success` | `string` or `null` | One-shot success message from `->with('success', ...)` |
-| `settings.login` | `{ app_name, show_logo, primary_color, custom_css }` | Login page settings (falls back to defaults via `rescue()` if table missing) |
+| `settings.login` | `{ app_name, show_logo, primary_color, custom_css, logo_url, bg_color }` | Login page settings (falls back to defaults via `rescue()` if table missing) |
 
 ### Database
 
