@@ -60,26 +60,19 @@ function logout() {
 
             <div class="flex items-center gap-4">
                 <div class="h-4 w-px bg-[#e3e3e0] dark:bg-[#3E3E3A]"></div>
-                <nav class="flex items-center gap-1 text-sm">
-                    <a
-                        href="/home"
-                        class="rounded-sm sm:text-center px-3 py-1.5 text-[#706f6c] transition hover:bg-[#f5f5f3] hover:text-[#1b1b18] dark:text-[#A1A09A] dark:hover:bg-[#1e1e1c] dark:hover:text-[#EDEDEC]"
-                    >
-                        Página Inícial
-                    </a>
-                </nav>
+
+                <span class="text-sm text-[#706f6c] dark:text-[#A1A09A]">
+                    {{ auth.user.nickname ? `${auth.user.nickname} (${auth.user.username})` : auth.user.username }} 
+                </span>
 
                 <div class="h-4 w-px bg-[#e3e3e0] dark:bg-[#3E3E3A]"></div>
 
-                <span class="text-sm text-[#706f6c] dark:text-[#A1A09A]">
-                    {{ auth.user.username }}
-                </span>
                 <button
                     type="button"
                     class="rounded-sm border border-[#e3e3e0] bg-white px-4 py-1.5 text-sm font-medium text-[#1b1b18] transition hover:bg-[#f5f5f3] dark:border-[#3E3E3A] dark:bg-[#161615] dark:text-[#EDEDEC] dark:hover:bg-[#1e1e1c]"
                     @click="logout"
                 >
-                    Sair
+                    Deslogar
                 </button>
             </div>
         </header>
