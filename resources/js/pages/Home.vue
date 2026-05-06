@@ -115,6 +115,19 @@ defineProps<{
 
                         <ActionCard
                             v-if="auth.user.is_admin"
+                            href="/admin/apps"
+                            title="Gerenciar aplicações"
+                            description="Registrar e configurar apps integrados ao SSO."
+                        >
+                            <template #icon>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#706f6c] dark:text-[#A1A09A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" />
+                                </svg>
+                            </template>
+                        </ActionCard>
+
+                        <ActionCard
+                            v-if="auth.user.is_admin"
                             href="/admin/settings"
                             title="Personalizar login"
                             description="Alterar aparência da página de login do SSO."

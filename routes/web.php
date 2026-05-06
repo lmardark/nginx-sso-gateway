@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Admin\AppController;
 use App\Http\Controllers\Admin\AuditController;
 use App\Http\Controllers\Admin\SetupController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\HealthController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Sso\TokenController;
 use Illuminate\Support\Facades\Route;
 
 if (! defined('LOGIN_PATH')) {
@@ -30,6 +33,12 @@ Route::get('/auth/check', fn () => auth()->check()
     : response()->noContent(401)
 )->name('auth.check');
 
+// Health check
+Route::get('/health', HealthController::class)->name('health');
+
+// SSO JWT (cross-domain) — token requer sessão ativa; validate é público para apps backend
+Route::post('/sso/validate', [TokenController::class, 'validate'])->name('sso.validate');
+
 Route::middleware(['universal.auth'])->group(function () {
     Route::inertia(LOGIN_PATH, 'Auth/Login')->name('login');
     Route::inertia('/home', 'Home')->name('home');
@@ -37,6 +46,9 @@ Route::middleware(['universal.auth'])->group(function () {
     // Perfil do usuário autenticado
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    // SSO — emissão de token (requer sessão ativa)
+    Route::get('/sso/token', [TokenController::class, 'issue'])->name('sso.token');
 
     // Admin
     Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
@@ -54,5 +66,14 @@ Route::middleware(['universal.auth'])->group(function () {
         Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+
+        // Gerenciamento de aplicações SSO
+        Route::get('/apps', [AppController::class, 'index'])->name('apps.index');
+        Route::get('/apps/create', [AppController::class, 'create'])->name('apps.create');
+        Route::post('/apps', [AppController::class, 'store'])->name('apps.store');
+        Route::get('/apps/{app}/edit', [AppController::class, 'edit'])->name('apps.edit');
+        Route::put('/apps/{app}', [AppController::class, 'update'])->name('apps.update');
+        Route::delete('/apps/{app}', [AppController::class, 'destroy'])->name('apps.destroy');
+        Route::post('/apps/{app}/regenerate-key', [AppController::class, 'regenerateApiKey'])->name('apps.regenerate-key');
     });
 });

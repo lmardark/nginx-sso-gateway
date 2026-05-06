@@ -14,6 +14,7 @@ Sistema de autenticação centralizada (SSO) construído com **Laravel 13**, **I
 - [Estrutura do projeto](#estrutura-do-projeto)
 - [Rotas](#rotas)
 - [Fluxo de autenticação](#fluxo-de-autenticação)
+- [SSO JWT — integração cross-domain](#sso-jwt--integração-cross-domain)
 - [Painel administrativo](#painel-administrativo)
 - [Primeiros passos — Setup inicial](#primeiros-passos--setup-inicial)
 - [Comandos disponíveis](#comandos-disponíveis)
@@ -21,6 +22,7 @@ Sistema de autenticação centralizada (SSO) construído com **Laravel 13**, **I
 - [Análise estática](#análise-estática)
 - [Qualidade de código](#qualidade-de-código)
 - [Deploy e Nginx](#deploy-e-nginx)
+- [Docker Compose](#docker-compose)
 - [Licença](#licença)
 
 ---
@@ -217,13 +219,25 @@ resources/js/
 | `GET` | `/setup` | Configuração inicial do administrador | — |
 | `POST` | `/setup` | Cria o primeiro usuário administrador | — |
 | `GET` | `/dashboard` | Dashboard principal | Sim |
-| `GET` | `/admin/users` | Lista todos os usuários | Sim |
-| `GET` | `/admin/users/create` | Formulário de criação | Sim |
-| `POST` | `/admin/users` | Salva novo usuário | Sim |
-| `GET` | `/admin/users/{id}/edit` | Formulário de edição | Sim |
-| `PUT` | `/admin/users/{id}` | Atualiza usuário | Sim |
-| `DELETE` | `/admin/users/{id}` | Remove usuário | Sim |
+| `GET` | `/health` | Health check do serviço (retorna JSON) | — |
 | `GET` | `/auth/check` | Validação de sessão para o Nginx `auth_request` | — |
+| `GET` | `/sso/token` | Emite JWT de uso único para SSO cross-domain | Sim |
+| `POST` | `/sso/validate` | Valida o JWT emitido (chamado pelo backend da app) | — |
+| `GET` | `/admin/audit` | Logs de auditoria | Admin |
+| `GET/PUT` | `/admin/settings` | Personalização da página de login | Admin |
+| `GET` | `/admin/users` | Lista todos os usuários | Admin |
+| `GET` | `/admin/users/create` | Formulário de criação | Admin |
+| `POST` | `/admin/users` | Salva novo usuário | Admin |
+| `GET` | `/admin/users/{id}/edit` | Formulário de edição | Admin |
+| `PUT` | `/admin/users/{id}` | Atualiza usuário | Admin |
+| `DELETE` | `/admin/users/{id}` | Remove usuário | Admin |
+| `GET` | `/admin/apps` | Lista aplicações integradas ao SSO | Admin |
+| `GET` | `/admin/apps/create` | Formulário de nova aplicação | Admin |
+| `POST` | `/admin/apps` | Registra nova aplicação | Admin |
+| `GET` | `/admin/apps/{id}/edit` | Formulário de edição da aplicação | Admin |
+| `PUT` | `/admin/apps/{id}` | Atualiza aplicação | Admin |
+| `DELETE` | `/admin/apps/{id}` | Remove aplicação | Admin |
+| `POST` | `/admin/apps/{id}/regenerate-key` | Regenera a API Key da aplicação | Admin |
 
 
 ---
@@ -256,17 +270,84 @@ O redirecionamento pós-login aceita um parâmetro `return_to` na query string o
 
 ---
 
+## SSO JWT — integração cross-domain
+
+Além do SSO via cookie (subdomínios), o gateway oferece um fluxo JWT para integrar aplicações em **domínios completamente diferentes**.
+
+### Como funciona
+
+```
+1. Usuário está autenticado em auth.seudominio.com
+2. Aplicação em outro-site.com redireciona o usuário para:
+   GET https://auth.seudominio.com/sso/token
+       ?app=<API_KEY_DA_APLICAÇÃO>
+       &redirect=https://outro-site.com/sso/callback
+
+3. O gateway valida a sessão, gera um JWT HS256 de uso único (TTL: 2 min)
+   e redireciona para:
+   https://outro-site.com/sso/callback?sso_token=<jwt>
+
+4. O backend de outro-site.com valida o token:
+   POST https://auth.seudominio.com/sso/validate
+   { "token": "<jwt>", "api_key": "<API_KEY_DA_APLICAÇÃO>" }
+
+5. Resposta de sucesso:
+   { "valid": true, "user": { "id": 1, "username": "joao", "nickname": "João", "is_admin": false } }
+```
+
+### Cadastrar uma aplicação
+
+1. Acesse `/admin/apps` → **Nova aplicação**
+2. Informe o nome e os **domínios permitidos** (um por linha)
+3. Opcionalmente, informe a URL de callback padrão
+4. A **API Key** é gerada automaticamente — guarde-a com segurança
+5. Para rotacionar a chave, clique em **Regenerar** na tela de edição
+
+### Payload do JWT
+
+```json
+{
+  "sub": "joao",
+  "user_id": 1,
+  "nickname": "João Silva",
+  "is_admin": false,
+  "app": "Minha Aplicação",
+  "jti": "<id único>",
+  "iat": 1746500000,
+  "exp": 1746500120
+}
+```
+
+O JWT é assinado com **HS256** usando a API Key da aplicação. O `jti` é registrado no banco e invalidado após o primeiro uso — **tokens não podem ser reutilizados**.
+
+---
+
 ## Painel administrativo
 
-O painel permite gerenciar os usuários do sistema. Acessível via `/admin/users` após autenticação.
+O painel administrativo (`/home` → seção "Ações do Administrador") centraliza todas as funções de gerenciamento.
 
-### Funcionalidades
+### Módulos disponíveis
+
+| Módulo | URL | Descrição |
+|--------|-----|-----------|
+| Gerenciar Usuários | `/admin/users` | CRUD completo de usuários |
+| Gerenciar Aplicações | `/admin/apps` | Registro de apps SSO e gerenciamento de API Keys |
+| Auditoria | `/admin/audit` | Histórico paginado de eventos do sistema |
+| Personalizar Login | `/admin/settings` | Logo, cores e CSS da página de login |
+
+### Usuários
 
 - **Listagem** — tabela com busca em tempo real por nome de usuário
 - **Criar usuário** — formulário com usuário, senha e confirmação
 - **Editar usuário** — atualiza nome de usuário e/ou senha (senha opcional na edição)
 - **Excluir usuário** — modal de confirmação antes da exclusão
 - **Indicador "você"** — destaca o próprio usuário na listagem
+
+### Aplicações SSO
+
+- **Cadastro** — nome, domínios permitidos (um por linha), URL de callback e status
+- **API Key** — gerada automaticamente; visível na tela de edição (pode ser regenerada)
+- **Subdomínios** — se `app.seudominio.com` está na lista, todos os subdomínios são aceitos
 
 ### Primeiro acesso
 
@@ -375,9 +456,43 @@ Configurado em `eslint.config.js` com os plugins `eslint-plugin-vue`, `typescrip
 
 ## Deploy e Nginx
 
-Para configuração completa do Nginx, incluindo SSL, SSO com `auth_request` e todas as permissões necessárias, consulte o arquivo [`NGINX.md`](./NGINX.md).
+O diretório `nginx/` contém exemplos prontos de configuração:
 
-Resumo rápido para produção:
+| Arquivo | Uso |
+|---------|-----|
+| `nginx/sso-gateway.conf` | Servidor do gateway SSO (`auth.seudominio.com`) |
+| `nginx/app-subdomain.conf` | App no mesmo domínio — usa cookie + `auth_request` |
+| `nginx/app-crossdomain.conf` | App em domínio diferente — usa fluxo JWT |
+
+### Configuração rápida para subdomínio
+
+```nginx
+# Em /etc/nginx/sites-enabled/minha-app.conf
+server {
+    listen 443 ssl;
+    server_name app.seudominio.com;
+
+    location = /auth/check {
+        internal;
+        proxy_pass              https://auth.seudominio.com/auth/check;
+        proxy_pass_request_body off;
+        proxy_set_header        Content-Length "";
+        proxy_set_header        Cookie $http_cookie;
+    }
+
+    location / {
+        auth_request /auth/check;
+        error_page 401 = @login_redirect;
+        proxy_pass http://localhost:3000;
+    }
+
+    location @login_redirect {
+        return 302 https://auth.seudominio.com/login?return_to=$scheme://$host$request_uri;
+    }
+}
+```
+
+### Deploy da aplicação
 
 ```bash
 # Build dos assets
@@ -388,12 +503,27 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
+# Link do storage público (logos)
+php artisan storage:link
+
 # Permissões
 chown -R www-data:www-data /var/www/auth
 chmod -R 775 /var/www/auth/storage /var/www/auth/bootstrap/cache
 ```
 
-A rota `/auth/check` já está configurada em `routes/web.php` e pronta para uso.
+---
+
+## Docker Compose
+
+Um exemplo de configuração Docker está disponível em `docker-compose.example.yml`:
+
+```bash
+cp docker-compose.example.yml docker-compose.yml
+# Edite as variáveis de ambiente no arquivo
+docker compose up -d
+```
+
+Inclui os serviços `app` (PHP-FPM) e `nginx` com volume compartilhado para `storage/`.
 
 ---
 
