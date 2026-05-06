@@ -75,9 +75,7 @@ const clientUsernameError = computed<string | null>(() => {
             if (!new RegExp(form.custom_pattern).test(form.username)) {
                 return 'O usuário não corresponde ao padrão personalizado.';
             }
-        } catch {
-            // regex inválido, pular validação no frontend
-        }
+        } catch {}
     }
 
     return null;
@@ -105,12 +103,10 @@ const customPatternError = computed<string | null>(() => {
         class="flex min-h-screen flex-col items-center justify-center bg-[#FDFDFC] p-6 text-[#1b1b18] dark:bg-[#0a0a0a]"
     >
         <div class="w-full max-w-md">
-            <!-- Logo -->
             <div class="mb-8 flex justify-center">
                 <AppLogo class="h-8" />
             </div>
 
-            <!-- Banner de aviso -->
             <div
                 class="mb-6 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-800 dark:bg-amber-950"
             >
@@ -143,7 +139,6 @@ const customPatternError = computed<string | null>(() => {
                 </div>
             </div>
 
-            <!-- Card -->
             <div
                 class="rounded-lg bg-white px-8 py-10 shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:bg-[#161615] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]"
             >
@@ -159,7 +154,6 @@ const customPatternError = computed<string | null>(() => {
                 </p>
 
                 <form @submit.prevent="submit" class="flex flex-col gap-5">
-                    <!-- Apelido (opcional) -->
                     <div class="flex flex-col gap-1.5">
                         <label
                             for="nickname"
@@ -190,7 +184,6 @@ const customPatternError = computed<string | null>(() => {
                         </p>
                     </div>
 
-                    <!-- Tipo de validação -->
                     <div class="flex flex-col gap-1.5">
                         <label
                             for="validation_type"
@@ -220,7 +213,6 @@ const customPatternError = computed<string | null>(() => {
                         </p>
                     </div>
 
-                    <!-- Padrão personalizado (apenas quando "personalizado" está selecionado) -->
                     <div
                         v-if="form.validation_type === 'personalizado'"
                         class="flex flex-col gap-1.5"
@@ -265,7 +257,6 @@ const customPatternError = computed<string | null>(() => {
                         </p>
                     </div>
 
-                    <!-- Usuário -->
                     <div class="flex flex-col gap-1.5">
                         <label
                             for="username"
@@ -325,7 +316,6 @@ const customPatternError = computed<string | null>(() => {
                         "
                     />
 
-                    <!-- Botão -->
                     <button
                         type="submit"
                         :disabled="form.processing"

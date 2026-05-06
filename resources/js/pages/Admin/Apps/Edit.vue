@@ -49,7 +49,6 @@ function regenerateKey() {
 
         <main class="flex flex-1 justify-center p-6">
             <div class="w-full max-w-2xl">
-                <!-- Page title -->
                 <div class="mb-6">
                     <div class="mb-1 flex items-center gap-2">
                         <a
@@ -83,7 +82,6 @@ function regenerateKey() {
                     </p>
                 </div>
 
-                <!-- Success banner -->
                 <div
                     v-if="successMessage"
                     class="mb-6 flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3 dark:border-green-800 dark:bg-green-950"
@@ -109,7 +107,6 @@ function regenerateKey() {
                     </p>
                 </div>
 
-                <!-- API Key card -->
                 <div
                     class="mb-6 rounded-lg bg-white shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:bg-[#161615] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]"
                 >
@@ -156,7 +153,6 @@ function regenerateKey() {
                     </div>
                 </div>
 
-                <!-- Form card -->
                 <div
                     class="rounded-lg bg-white shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:bg-[#161615] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]"
                 >
@@ -171,7 +167,6 @@ function regenerateKey() {
                                 Informações da aplicação
                             </h2>
                             <div class="flex flex-col gap-5">
-                                <!-- Name -->
                                 <div class="flex flex-col gap-1.5">
                                     <label
                                         for="name"
@@ -197,7 +192,6 @@ function regenerateKey() {
                                     </p>
                                 </div>
 
-                                <!-- Allowed domains -->
                                 <div class="flex flex-col gap-1.5">
                                     <label
                                         for="allowed_domains"
@@ -231,7 +225,6 @@ function regenerateKey() {
                                     </p>
                                 </div>
 
-                                <!-- Callback URL -->
                                 <div class="flex flex-col gap-1.5">
                                     <label
                                         for="callback_url"
@@ -262,7 +255,6 @@ function regenerateKey() {
                                     </p>
                                 </div>
 
-                                <!-- Active -->
                                 <div class="flex items-center gap-3">
                                     <input
                                         id="active"
@@ -280,7 +272,6 @@ function regenerateKey() {
                             </div>
                         </div>
 
-                        <!-- Actions -->
                         <div
                             class="flex items-center justify-end gap-3 px-8 py-5"
                         >

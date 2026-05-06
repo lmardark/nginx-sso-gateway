@@ -78,7 +78,6 @@ function submit() {
 
         <main class="flex-1 p-6">
             <div class="mx-auto max-w-5xl">
-                <!-- Page title -->
                 <div class="mb-6">
                     <div class="mb-1 flex items-center gap-2">
                         <a
@@ -112,7 +111,6 @@ function submit() {
                     </p>
                 </div>
 
-                <!-- Success banner -->
                 <div
                     v-if="successMessage"
                     class="mb-6 flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3 dark:border-green-800 dark:bg-green-950"
@@ -139,7 +137,6 @@ function submit() {
                 </div>
 
                 <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <!-- Form -->
                     <div
                         class="rounded-lg bg-white shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:bg-[#161615] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]"
                     >
@@ -147,7 +144,6 @@ function submit() {
                             @submit.prevent="submit"
                             class="flex flex-col divide-y divide-[#e3e3e0] dark:divide-[#3E3E3A]"
                         >
-                            <!-- Aparência -->
                             <div class="px-8 py-6">
                                 <h2
                                     class="mb-4 text-sm font-semibold tracking-wide text-[#706f6c] uppercase dark:text-[#A1A09A]"
@@ -155,7 +151,6 @@ function submit() {
                                     Aparência
                                 </h2>
                                 <div class="flex flex-col gap-5">
-                                    <!-- App name -->
                                     <div class="flex flex-col gap-1.5">
                                         <label
                                             for="login_app_name"
@@ -182,7 +177,6 @@ function submit() {
                                         </p>
                                     </div>
 
-                                    <!-- Primary color -->
                                     <div class="flex flex-col gap-1.5">
                                         <label
                                             for="login_primary_color"
@@ -226,7 +220,6 @@ function submit() {
                                         </p>
                                     </div>
 
-                                    <!-- Background color -->
                                     <div class="flex flex-col gap-1.5">
                                         <label
                                             for="login_bg_color"
@@ -262,7 +255,6 @@ function submit() {
                                         </p>
                                     </div>
 
-                                    <!-- Show logo -->
                                     <label
                                         class="flex cursor-pointer items-center gap-3"
                                     >
@@ -298,7 +290,6 @@ function submit() {
                                 </div>
                             </div>
 
-                            <!-- Logo upload -->
                             <div class="px-8 py-6">
                                 <h2
                                     class="mb-1 text-sm font-semibold tracking-wide text-[#706f6c] uppercase dark:text-[#A1A09A]"
@@ -312,7 +303,6 @@ function submit() {
                                     suportados: PNG, JPG, SVG, WebP (máx. 2 MB).
                                 </p>
 
-                                <!-- Current logo preview -->
                                 <div
                                     v-if="logoPreviewUrl"
                                     class="mb-3 flex items-center gap-3"
@@ -384,7 +374,6 @@ function submit() {
                                 </p>
                             </div>
 
-                            <!-- CSS personalizado -->
                             <div class="px-8 py-6">
                                 <h2
                                     class="mb-1 text-sm font-semibold tracking-wide text-[#706f6c] uppercase dark:text-[#A1A09A]"
@@ -406,7 +395,6 @@ function submit() {
                                 ></textarea>
                             </div>
 
-                            <!-- Actions -->
                             <div
                                 class="flex items-center justify-end px-8 py-5"
                             >
@@ -424,7 +412,6 @@ function submit() {
                         </form>
                     </div>
 
-                    <!-- Preview -->
                     <div>
                         <h2
                             class="mb-3 text-sm font-semibold tracking-wide text-[#706f6c] uppercase dark:text-[#A1A09A]"
@@ -441,7 +428,6 @@ function submit() {
                                         form.login_bg_color || '#FDFDFC',
                                 }"
                             >
-                                <!-- Logo preview -->
                                 <div
                                     v-if="form.login_show_logo"
                                     class="mb-6 flex justify-center"
@@ -462,7 +448,6 @@ function submit() {
                                         }"
                                     />
                                 </div>
-                                <!-- Card preview -->
                                 <div
                                     class="w-full max-w-xs rounded-lg bg-white px-6 py-7 shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:bg-[#161615] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]"
                                 >

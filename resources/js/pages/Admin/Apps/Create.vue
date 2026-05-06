@@ -33,7 +33,6 @@ function submit() {
 
         <main class="flex flex-1 justify-center p-6">
             <div class="w-full max-w-2xl">
-                <!-- Page title -->
                 <div class="mb-6">
                     <div class="mb-1 flex items-center gap-2">
                         <a
@@ -68,7 +67,6 @@ function submit() {
                     </p>
                 </div>
 
-                <!-- Form card -->
                 <div
                     class="rounded-lg bg-white shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:bg-[#161615] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]"
                 >
@@ -83,7 +81,6 @@ function submit() {
                                 Informações da aplicação
                             </h2>
                             <div class="flex flex-col gap-5">
-                                <!-- Name -->
                                 <div class="flex flex-col gap-1.5">
                                     <label
                                         for="name"
@@ -110,7 +107,6 @@ function submit() {
                                     </p>
                                 </div>
 
-                                <!-- Allowed domains -->
                                 <div class="flex flex-col gap-1.5">
                                     <label
                                         for="allowed_domains"
@@ -144,7 +140,6 @@ function submit() {
                                     </p>
                                 </div>
 
-                                <!-- Callback URL -->
                                 <div class="flex flex-col gap-1.5">
                                     <label
                                         for="callback_url"
@@ -181,7 +176,6 @@ function submit() {
                                     </p>
                                 </div>
 
-                                <!-- Active -->
                                 <div class="flex items-center gap-3">
                                     <input
                                         id="active"
@@ -199,7 +193,6 @@ function submit() {
                             </div>
                         </div>
 
-                        <!-- Actions -->
                         <div
                             class="flex items-center justify-end gap-3 px-8 py-5"
                         >

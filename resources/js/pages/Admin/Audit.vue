@@ -116,6 +116,15 @@ function formatDate(dateStr: string): string {
     });
 }
 
+function decodeLabel(label: string): string {
+    return label
+        .replace(/&laquo;/g, '«')
+        .replace(/&raquo;/g, '»')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>');
+}
+
 function actorDisplay(log: LogEntry): string {
     if (log.actor) {
         return log.actor.nickname
@@ -137,7 +146,6 @@ function actorDisplay(log: LogEntry): string {
 
         <main class="flex-1 p-6">
             <div class="mx-auto max-w-6xl">
-                <!-- Page header -->
                 <div class="mb-6">
                     <div class="mb-1 flex items-center gap-2">
                         <a
@@ -177,9 +185,7 @@ function actorDisplay(log: LogEntry): string {
                     </p>
                 </div>
 
-                <!-- Filters -->
                 <div class="mb-4 flex flex-col gap-3 sm:flex-row">
-                    <!-- Search -->
                     <div class="relative flex-1">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -202,7 +208,6 @@ function actorDisplay(log: LogEntry): string {
                             class="w-full rounded-sm border border-[#e3e3e0] bg-[#FDFDFC] py-2 pr-3 pl-9 text-sm text-[#1b1b18] transition outline-none placeholder:text-[#b5b3ad] focus:border-[#1b1b18] focus:ring-1 focus:ring-[#1b1b18] dark:border-[#3E3E3A] dark:bg-[#1a1a18] dark:text-[#EDEDEC] dark:placeholder:text-[#55544f] dark:focus:border-[#EDEDEC] dark:focus:ring-[#EDEDEC]"
                         />
                     </div>
-                    <!-- Event filter -->
                     <select
                         v-model="filterEvent"
                         class="rounded-sm border border-[#e3e3e0] bg-[#FDFDFC] px-3 py-2 text-sm text-[#1b1b18] transition outline-none focus:border-[#1b1b18] focus:ring-1 focus:ring-[#1b1b18] dark:border-[#3E3E3A] dark:bg-[#1a1a18] dark:text-[#EDEDEC] dark:focus:border-[#EDEDEC] dark:focus:ring-[#EDEDEC]"
@@ -218,11 +223,9 @@ function actorDisplay(log: LogEntry): string {
                     </select>
                 </div>
 
-                <!-- Table -->
                 <div
                     class="overflow-hidden rounded-lg shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]"
                 >
-                    <!-- Empty state -->
                     <div
                         v-if="logs.data.length === 0"
                         class="flex flex-col items-center justify-center bg-white py-16 dark:bg-[#161615]"
@@ -340,7 +343,6 @@ function actorDisplay(log: LogEntry): string {
                     </div>
                 </div>
 
-                <!-- Pagination -->
                 <div
                     v-if="logs.last_page > 1"
                     class="mt-4 flex items-center justify-between text-sm"
@@ -361,12 +363,12 @@ function actorDisplay(log: LogEntry): string {
                                         : 'border-[#e3e3e0] bg-white text-[#1b1b18] hover:bg-[#f5f5f3] dark:border-[#3E3E3A] dark:bg-[#161615] dark:text-[#EDEDEC] dark:hover:bg-[#1e1e1c]'
                                 "
                                 @click="goToPage(link.url)"
-                                v-html="link.label"
+                                v-text="decodeLabel(link.label)"
                             />
                             <span
                                 v-else
                                 class="min-w-[32px] rounded-sm border border-[#e3e3e0] px-2 py-1 text-center text-xs text-[#b5b3ad] dark:border-[#3E3E3A] dark:text-[#55544f]"
-                                v-html="link.label"
+                                v-text="decodeLabel(link.label)"
                             />
                         </template>
                     </div>

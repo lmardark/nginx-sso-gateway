@@ -65,10 +65,8 @@ function deleteUser() {
     >
         <AppHeader :user="auth.user" />
 
-        <!-- Content -->
         <main class="flex-1 p-6">
             <div class="mx-auto max-w-5xl">
-                <!-- Page header -->
                 <div class="mb-6 flex items-center justify-between">
                     <div>
                         <div class="mb-1 flex items-center gap-2">
@@ -131,7 +129,6 @@ function deleteUser() {
                     </a>
                 </div>
 
-                <!-- Search -->
                 <div class="mb-4 flex items-center gap-3">
                     <div class="relative flex-1">
                         <svg
@@ -157,11 +154,9 @@ function deleteUser() {
                     </div>
                 </div>
 
-                <!-- Table card -->
                 <div
                     class="overflow-hidden rounded-lg shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]"
                 >
-                    <!-- Empty state -->
                     <div
                         v-if="filteredUsers.length === 0"
                         class="flex flex-col items-center justify-center bg-white py-16 dark:bg-[#161615]"
@@ -204,7 +199,6 @@ function deleteUser() {
                         </p>
                     </div>
 
-                    <!-- Table -->
                     <table
                         v-else
                         class="w-full bg-white text-sm dark:bg-[#161615]"
@@ -313,7 +307,6 @@ function deleteUser() {
         </main>
     </div>
 
-    <!-- Modal de confirmação de exclusão -->
     <Teleport to="body">
         <div
             v-if="confirmDeleteId !== null"

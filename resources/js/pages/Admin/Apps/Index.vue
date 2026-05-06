@@ -77,7 +77,6 @@ async function copyKey(id: number, key: string) {
 
         <main class="flex-1 p-6">
             <div class="mx-auto max-w-5xl">
-                <!-- Success banner -->
                 <div
                     v-if="successMessage"
                     class="mb-6 flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3 dark:border-green-800 dark:bg-green-950"
@@ -103,7 +102,6 @@ async function copyKey(id: number, key: string) {
                     </p>
                 </div>
 
-                <!-- Page header -->
                 <div class="mb-6 flex items-center justify-between">
                     <div>
                         <div class="mb-1 flex items-center gap-2">
@@ -166,7 +164,6 @@ async function copyKey(id: number, key: string) {
                     </a>
                 </div>
 
-                <!-- Search -->
                 <div class="mb-4">
                     <div class="relative">
                         <svg
@@ -192,11 +189,9 @@ async function copyKey(id: number, key: string) {
                     </div>
                 </div>
 
-                <!-- Table card -->
                 <div
                     class="overflow-hidden rounded-lg shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]"
                 >
-                    <!-- Empty state -->
                     <div
                         v-if="filteredApps.length === 0"
                         class="flex flex-col items-center justify-center bg-white py-16 dark:bg-[#161615]"
@@ -239,7 +234,6 @@ async function copyKey(id: number, key: string) {
                         </p>
                     </div>
 
-                    <!-- Table -->
                     <table
                         v-else
                         class="w-full bg-white text-sm dark:bg-[#161615]"
@@ -410,7 +404,6 @@ async function copyKey(id: number, key: string) {
         </main>
     </div>
 
-    <!-- Modal de confirmação de exclusão -->
     <Teleport to="body">
         <div
             v-if="confirmDeleteId !== null"

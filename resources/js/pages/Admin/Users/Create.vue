@@ -60,10 +60,8 @@ function submit() {
     >
         <AppHeader :user="auth.user" />
 
-        <!-- Content -->
         <main class="flex flex-1 justify-center p-6">
             <div class="w-full max-w-2xl">
-                <!-- Page title -->
                 <div class="mb-6">
                     <div class="mb-1 flex items-center gap-2">
                         <a
@@ -98,7 +96,6 @@ function submit() {
                     </p>
                 </div>
 
-                <!-- Form card -->
                 <div
                     class="rounded-lg bg-white shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:bg-[#161615] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]"
                 >
@@ -106,7 +103,6 @@ function submit() {
                         @submit.prevent="submit"
                         class="flex flex-col divide-y divide-[#e3e3e0] dark:divide-[#3E3E3A]"
                     >
-                        <!-- Dados -->
                         <div class="px-8 py-6">
                             <h2
                                 class="mb-4 text-sm font-semibold tracking-wide text-[#706f6c] uppercase dark:text-[#A1A09A]"
@@ -114,7 +110,6 @@ function submit() {
                                 Dados do usuário
                             </h2>
                             <div class="flex flex-col gap-5">
-                                <!-- Username -->
                                 <div class="flex flex-col gap-1.5">
                                     <label
                                         for="username"
@@ -154,7 +149,6 @@ function submit() {
                                     </p>
                                 </div>
 
-                                <!-- Nickname -->
                                 <div class="flex flex-col gap-1.5">
                                     <label
                                         for="nickname"
@@ -181,7 +175,6 @@ function submit() {
                                     </p>
                                 </div>
 
-                                <!-- is_admin -->
                                 <label
                                     class="flex cursor-pointer items-center gap-3"
                                 >
@@ -216,7 +209,6 @@ function submit() {
                             </div>
                         </div>
 
-                        <!-- Segurança -->
                         <div class="px-8 py-6">
                             <h2
                                 class="mb-4 text-sm font-semibold tracking-wide text-[#706f6c] uppercase dark:text-[#A1A09A]"
@@ -247,7 +239,6 @@ function submit() {
                             </div>
                         </div>
 
-                        <!-- Actions -->
                         <div
                             class="flex items-center justify-end gap-3 px-8 py-5"
                         >

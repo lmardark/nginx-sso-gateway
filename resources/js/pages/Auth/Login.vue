@@ -53,7 +53,6 @@ onBeforeUnmount(() => {
         "
     >
         <div class="w-full max-w-md">
-            <!-- Logo -->
             <div
                 v-if="settings?.show_logo !== false"
                 class="mb-8 flex justify-center"
@@ -71,7 +70,6 @@ onBeforeUnmount(() => {
                 />
             </div>
 
-            <!-- Card -->
             <div
                 class="rounded-lg bg-white px-8 py-10 shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:bg-[#161615] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]"
             >
@@ -87,7 +85,6 @@ onBeforeUnmount(() => {
                 </p>
 
                 <form @submit.prevent="submit" class="flex flex-col gap-5">
-                    <!-- Username -->
                     <div class="flex flex-col gap-1.5">
                         <label
                             for="username"
@@ -126,7 +123,6 @@ onBeforeUnmount(() => {
                         @update:model-value="form.password = $event"
                     />
 
-                    <!-- Lembrar-me -->
                     <label class="flex cursor-pointer items-center gap-2">
                         <input
                             v-model="form.remember"
@@ -140,7 +136,6 @@ onBeforeUnmount(() => {
                         </span>
                     </label>
 
-                    <!-- Botão -->
                     <button
                         type="submit"
                         :disabled="form.processing"
