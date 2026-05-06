@@ -19,14 +19,15 @@ const page = usePage<{ flash: { success?: string } }>();
 const successMessage = computed(() => page.props.flash?.success);
 
 const form = useForm({
-    nickname: props.auth.user.nickname ?? '',
-    password: '',
+    nickname:              props.auth.user.nickname ?? '',
+    current_password:      '',
+    password:              '',
     password_confirmation: '',
 });
 
 function submit() {
     form.put('/profile', {
-        onSuccess: () => form.reset('password', 'password_confirmation'),
+        onSuccess: () => form.reset('current_password', 'password', 'password_confirmation'),
     });
 }
 </script>
@@ -117,6 +118,15 @@ function submit() {
                             </h2>
                             <p class="mb-4 text-xs text-[#706f6c] dark:text-[#A1A09A]">Deixe em branco para manter a senha atual.</p>
                             <div class="flex flex-col gap-5">
+                                <PasswordInput
+                                    v-if="!auth.user.is_admin"
+                                    id="current_password"
+                                    label="Senha atual"
+                                    :model-value="form.current_password"
+                                    :error="form.errors.current_password"
+                                    autocomplete="current-password"
+                                    @update:model-value="form.current_password = $event"
+                                />
                                 <PasswordInput
                                     id="password"
                                     label="Nova senha"

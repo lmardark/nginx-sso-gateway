@@ -78,7 +78,7 @@ app/
 │   │   ├── Admin/SettingsController.php  # Login page customization (admin only)
 │   │   ├── Admin/UserController.php      # User CRUD (admin only)
 │   │   ├── Auth/AuthController.php       # Login / logout
-│   │   └── ProfileController.php         # Authenticated user's own profile
+│   │   └── ProfileController.php         # Authenticated user's own profile; password change requires current_password for non-admins
 │   ├── Middleware/
 │   │   ├── CheckFirstSetup.php
 │   │   ├── UniversalAuth.php

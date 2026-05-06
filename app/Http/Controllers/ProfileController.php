@@ -19,15 +19,18 @@ final class ProfileController extends Controller
 
     public function update(Request $request): RedirectResponse
     {
+        $user = $request->user();
+        $changingPassword = ! empty($request->input('password'));
+
         $validated = $request->validate([
             'nickname' => ['nullable', 'string', 'max:255'],
+            'current_password' => ($changingPassword && ! $user->is_admin) ? ['required', 'current_password'] : [],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ]);
 
-        $user = $request->user();
         $user->nickname = ($validated['nickname'] ?? '') ?: null;
 
-        if (! empty($validated['password'])) {
+        if ($changingPassword) {
             $user->password = $validated['password'];
         }
 
