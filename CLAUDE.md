@@ -71,6 +71,8 @@ The `return_to` host is validated against `ALLOWED_HOST_REDIRECT` (env var → `
 
 ```
 app/
+├── Console/Commands/
+│   └── PruneSsoTokens.php           # sso:prune-tokens — deletes expired sso_tokens (scheduled daily)
 ├── Http/
 │   ├── Controllers/
 │   │   ├── Admin/AppController.php       # App CRUD + regenerateApiKey (admin only)
@@ -81,7 +83,7 @@ app/
 │   │   ├── Auth/AuthController.php       # Login / logout
 │   │   ├── HealthController.php          # GET /health — JSON status + DB check
 │   │   ├── ProfileController.php         # Authenticated user's own profile; password change requires current_password for non-admins
-│   │   └── Sso/TokenController.php       # GET /sso/token (issue JWT) + POST /sso/validate
+│   │   └── Sso/TokenController.php       # GET /sso/token (issue JWT) + POST /sso/validate + GET /sso/logout
 │   ├── Middleware/
 │   │   ├── CheckFirstSetup.php
 │   │   ├── UniversalAuth.php
@@ -179,21 +181,22 @@ resources/js/
 
 ### Key Routes
 
-| Method | URI | Auth |
-|--------|-----|------|
-| `GET` | `/health` | — |
-| `GET` | `/auth/check` | — (Nginx SSO probe) |
-| `GET/POST` | `/login` | — |
-| `GET/POST` | `/setup` | — (only when no users exist) |
-| `GET` | `/home` | Required |
-| `GET/PUT` | `/profile` | Required |
-| `GET` | `/sso/token?app=<api_key>&redirect=<url>` | Required (redirects with `?sso_token=<jwt>`) |
-| `POST` | `/sso/validate` | — (body: `{token, api_key}`) |
-| `GET` | `/admin/audit` | Required + is_admin |
-| `GET/PUT` | `/admin/settings` | Required + is_admin |
-| `GET/POST/PUT/DELETE` | `/admin/users*` | Required + is_admin |
-| `GET/POST/PUT/DELETE` | `/admin/apps*` | Required + is_admin |
-| `POST` | `/admin/apps/{app}/regenerate-key` | Required + is_admin |
+| Method | URI | Auth | Notes |
+|--------|-----|------|-------|
+| `GET` | `/health` | — | |
+| `GET` | `/auth/check` | — | Nginx SSO probe |
+| `GET/POST` | `/login` | — | |
+| `GET/POST` | `/setup` | — | Only when no users exist |
+| `GET` | `/home` | Required | |
+| `GET/PUT` | `/profile` | Required | |
+| `GET` | `/sso/token?app=<api_key>&redirect=<url>` | Required | Throttle 30/min; redirects with `?sso_token=<jwt>` |
+| `POST` | `/sso/validate` | — | Throttle 60/min; CSRF exempt; body: `{token, api_key}` |
+| `GET` | `/sso/logout?app=<api_key>&redirect=<url>` | — | Logs out and redirects safely |
+| `GET` | `/admin/audit` | Required + is_admin | |
+| `GET/PUT` | `/admin/settings` | Required + is_admin | |
+| `GET/POST/PUT/DELETE` | `/admin/users*` | Required + is_admin | |
+| `GET/POST/PUT/DELETE` | `/admin/apps*` | Required + is_admin | |
+| `POST` | `/admin/apps/{app}/regenerate-key` | Required + is_admin | |
 
 ### JWT SSO Cross-Domain Flow
 
@@ -212,6 +215,25 @@ resources/js/
 - No `else` when avoidable (`no_useless_else`, `no_superfluous_elseif`)
 - Fully qualified imports — no leading `\` on global namespaces
 - Multibyte string functions (`mb_str_functions`)
+
+### Frontend Conventions
+
+- **No comments** in Vue/TS files — HTML `<!-- -->`, JS `//`, and TS `//` comments are all removed; the code is self-documenting via naming
+- **Never use `v-html`** — use `v-text` or interpolation `{{ }}` instead; if HTML entities need decoding (e.g. pagination labels), do it with a pure string-replace function, not `innerHTML`
+- Custom CSS is injected via `styleEl.textContent` (safe; not `innerHTML`) in `Login.vue`
+
+### Docker / Deploy
+
+```
+Dockerfile              # PHP 8.3-fpm-alpine; OPcache; auto-runs migrations on startup
+docker/entrypoint.sh    # Creates storage dirs and SQLite DB if missing; then php-fpm
+docker/php/opcache.ini  # OPcache config for production
+docker-compose.example.yml  # app + nginx + scheduler services; copy to docker-compose.yml
+```
+
+The `scheduler` service runs `php artisan schedule:run` every 60 s inside the container. The only scheduled task today is `sso:prune-tokens` (daily), which deletes tokens expired more than 24 h ago.
+
+To add a new scheduled task, register it in `routes/console.php` via `Schedule::command(...)`.
 
 ### Critical Environment Variables for SSO
 
