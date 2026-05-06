@@ -32,6 +32,25 @@ services:
     networks:
       - sso_net
 
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    entrypoint: ["sh", "-c", "while true; do php /var/www/artisan schedule:run --no-interaction >> /dev/null 2>&1; sleep 60; done"]
+    environment:
+      APP_ENV: production
+      APP_KEY: "${APP_KEY}"
+      APP_URL: "https://auth.seudominio.com"
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /var/www/storage/database.sqlite
+    volumes:
+      - sso_storage:/var/www/storage
+    depends_on:
+      - app
+    networks:
+      - sso_net
+
   nginx:
     image: nginx:alpine
     restart: unless-stopped

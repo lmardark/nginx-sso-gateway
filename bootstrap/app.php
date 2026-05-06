@@ -23,6 +23,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin'          => EnsureIsAdmin::class,
         ]);
 
+        $middleware->validateCsrfTokens(except: ['sso/validate']);
+
         $middleware->web(prepend: [
             CheckFirstSetup::class,
         ]);

@@ -37,7 +37,7 @@ Route::get('/auth/check', fn () => auth()->check()
 Route::get('/health', HealthController::class)->name('health');
 
 // SSO JWT (cross-domain) — validate e logout são públicos; token requer sessão ativa
-Route::post('/sso/validate', [TokenController::class, 'validate'])->name('sso.validate');
+Route::post('/sso/validate', [TokenController::class, 'validate'])->middleware('throttle:60,1')->name('sso.validate');
 Route::get('/sso/logout', [TokenController::class, 'logout'])->name('sso.logout');
 
 Route::middleware(['universal.auth'])->group(function () {
@@ -49,7 +49,7 @@ Route::middleware(['universal.auth'])->group(function () {
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     // SSO — emissão de token (requer sessão ativa)
-    Route::get('/sso/token', [TokenController::class, 'issue'])->name('sso.token');
+    Route::get('/sso/token', [TokenController::class, 'issue'])->middleware('throttle:30,1')->name('sso.token');
 
     // Admin
     Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {

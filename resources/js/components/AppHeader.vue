@@ -20,7 +20,9 @@ function logout() {
     >
         <a href="/home" class="flex items-center gap-3">
             <AppLogo class="h-6" />
-            <span class="text-sm font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">
+            <span
+                class="text-sm font-semibold text-[#1b1b18] dark:text-[#EDEDEC]"
+            >
                 Sistema de Autenticação
             </span>
         </a>
@@ -29,7 +31,11 @@ function logout() {
             <div class="h-4 w-px bg-[#e3e3e0] dark:bg-[#3E3E3A]"></div>
 
             <span class="text-sm text-[#706f6c] dark:text-[#A1A09A]">
-                {{ user.nickname ? `${user.nickname} (${user.username})` : user.username }}
+                {{
+                    user.nickname
+                        ? `${user.nickname} (${user.username})`
+                        : user.username
+                }}
             </span>
 
             <div class="h-4 w-px bg-[#e3e3e0] dark:bg-[#3E3E3A]"></div>
