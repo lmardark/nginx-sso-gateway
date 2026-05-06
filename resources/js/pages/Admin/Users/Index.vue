@@ -14,6 +14,7 @@ const props = defineProps<{
         id: number;
         username: string;
         nickname?: string;
+        is_admin: boolean;
         created_at: string;
     }>;
 }>();
@@ -163,6 +164,12 @@ function deleteUser() {
                                         >
                                             você
                                         </span>
+                                        <span
+                                            v-if="user.is_admin"
+                                            class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900 dark:text-amber-300"
+                                        >
+                                            admin
+                                        </span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-[#706f6c] dark:text-[#A1A09A]">
@@ -180,6 +187,7 @@ function deleteUser() {
                                             Editar
                                         </a>
                                         <button
+                                            v-if="user.username !== auth.user.username"
                                             type="button"
                                             class="rounded-sm border border-red-200 bg-white px-3 py-1 text-xs font-medium text-red-600 transition hover:bg-red-50 dark:border-red-900 dark:bg-[#161615] dark:text-red-400 dark:hover:bg-red-950"
                                             @click="confirmDelete(user.id)"

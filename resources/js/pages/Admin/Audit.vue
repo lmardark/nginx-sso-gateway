@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { Head, router } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
 import AppHeader from '@/components/AppHeader.vue';
 
 type LogEntry = {
@@ -13,6 +13,15 @@ type LogEntry = {
     actor: { id: number; username: string; nickname?: string } | null;
 };
 
+type PaginatedLogs = {
+    data: LogEntry[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    links: Array<{ url: string | null; label: string; active: boolean }>;
+};
+
 const props = defineProps<{
     auth: {
         user: {
@@ -21,51 +30,76 @@ const props = defineProps<{
             is_admin: boolean;
         };
     };
-    logs: LogEntry[];
+    logs: PaginatedLogs;
+    filters: { event?: string; search?: string };
 }>();
 
-const search = ref('');
-const filterEvent = ref('');
+const search      = ref(props.filters.search ?? '');
+const filterEvent = ref(props.filters.event ?? '');
+
+const allEvents = [
+    'login_success',
+    'login_failed',
+    'logout',
+    'user_created',
+    'user_updated',
+    'user_deleted',
+    'profile_updated',
+];
 
 const eventLabels: Record<string, string> = {
-    login_success: 'Login realizado',
-    login_failed:  'Login falhou',
-    logout:        'Logout',
-    user_created:  'Usuário criado',
-    user_updated:  'Usuário atualizado',
-    user_deleted:  'Usuário excluído',
+    login_success:   'Login realizado',
+    login_failed:    'Login falhou',
+    logout:          'Logout',
+    user_created:    'Usuário criado',
+    user_updated:    'Usuário atualizado',
+    user_deleted:    'Usuário excluído',
+    profile_updated: 'Perfil atualizado',
 };
 
 const eventColors: Record<string, string> = {
-    login_success: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400',
-    login_failed:  'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-400',
-    logout:        'bg-[#f5f5f3] text-[#706f6c] dark:bg-[#1e1e1c] dark:text-[#A1A09A]',
-    user_created:  'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-400',
-    user_updated:  'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-400',
-    user_deleted:  'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-400',
+    login_success:   'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400',
+    login_failed:    'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-400',
+    logout:          'bg-[#f5f5f3] text-[#706f6c] dark:bg-[#1e1e1c] dark:text-[#A1A09A]',
+    user_created:    'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-400',
+    user_updated:    'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-400',
+    user_deleted:    'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-400',
+    profile_updated: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-400',
 };
 
-const uniqueEvents = computed(() => [...new Set(props.logs.map((l) => l.event))]);
+let searchTimer: ReturnType<typeof setTimeout> | null = null;
 
-const filteredLogs = computed(() => {
-    return props.logs.filter((log) => {
-        const matchesEvent = filterEvent.value === '' || log.event === filterEvent.value;
-        const term = search.value.toLowerCase();
-        const matchesSearch =
-            term === '' ||
-            (log.actor?.username ?? '').toLowerCase().includes(term) ||
-            (log.target_username ?? '').toLowerCase().includes(term) ||
-            (log.ip_address ?? '').includes(term);
-        return matchesEvent && matchesSearch;
-    });
+function applyFilters(page = 1) {
+    router.get(
+        '/admin/audit',
+        {
+            event:  filterEvent.value || undefined,
+            search: search.value || undefined,
+            page:   page > 1 ? page : undefined,
+        },
+        { preserveState: true, replace: true },
+    );
+}
+
+watch(filterEvent, () => applyFilters());
+
+watch(search, () => {
+    if (searchTimer) clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => applyFilters(), 300);
 });
+
+function goToPage(url: string | null) {
+    if (! url) return;
+    const page = parseInt(new URL(url).searchParams.get('page') ?? '1', 10);
+    applyFilters(page);
+}
 
 function formatDate(dateStr: string): string {
     return new Date(dateStr).toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
+        day:    '2-digit',
+        month:  '2-digit',
+        year:   'numeric',
+        hour:   '2-digit',
         minute: '2-digit',
         second: '2-digit',
     });
@@ -90,24 +124,22 @@ function actorDisplay(log: LogEntry): string {
         <main class="flex-1 p-6">
             <div class="mx-auto max-w-6xl">
                 <!-- Page header -->
-                <div class="mb-6 flex items-center justify-between">
-                    <div>
-                        <div class="mb-1 flex items-center gap-2">
-                            <a
-                                href="/home"
-                                class="flex items-center gap-1.5 text-sm text-[#706f6c] transition hover:text-[#1b1b18] dark:text-[#A1A09A] dark:hover:text-[#EDEDEC]"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                                </svg>
-                                Voltar
-                            </a>
-                        </div>
-                        <h1 class="text-2xl font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">Auditoria</h1>
-                        <p class="mt-1 text-sm text-[#706f6c] dark:text-[#A1A09A]">
-                            Últimos {{ logs.length }} eventos registrados no sistema.
-                        </p>
+                <div class="mb-6">
+                    <div class="mb-1 flex items-center gap-2">
+                        <a
+                            href="/home"
+                            class="flex items-center gap-1.5 text-sm text-[#706f6c] transition hover:text-[#1b1b18] dark:text-[#A1A09A] dark:hover:text-[#EDEDEC]"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                            </svg>
+                            Voltar
+                        </a>
                     </div>
+                    <h1 class="text-2xl font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">Auditoria</h1>
+                    <p class="mt-1 text-sm text-[#706f6c] dark:text-[#A1A09A]">
+                        {{ logs.total }} {{ logs.total === 1 ? 'evento registrado' : 'eventos registrados' }} no sistema.
+                    </p>
                 </div>
 
                 <!-- Filters -->
@@ -134,8 +166,8 @@ function actorDisplay(log: LogEntry): string {
                         class="rounded-sm border border-[#e3e3e0] bg-[#FDFDFC] px-3 py-2 text-sm text-[#1b1b18] outline-none transition focus:border-[#1b1b18] focus:ring-1 focus:ring-[#1b1b18] dark:border-[#3E3E3A] dark:bg-[#1a1a18] dark:text-[#EDEDEC] dark:focus:border-[#EDEDEC] dark:focus:ring-[#EDEDEC]"
                     >
                         <option value="">Todos os eventos</option>
-                        <option v-for="evt in uniqueEvents" :key="evt" :value="evt">
-                            {{ eventLabels[evt] ?? evt }}
+                        <option v-for="evt in allEvents" :key="evt" :value="evt">
+                            {{ eventLabels[evt] }}
                         </option>
                     </select>
                 </div>
@@ -144,7 +176,7 @@ function actorDisplay(log: LogEntry): string {
                 <div class="overflow-hidden rounded-lg shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]">
                     <!-- Empty state -->
                     <div
-                        v-if="filteredLogs.length === 0"
+                        v-if="logs.data.length === 0"
                         class="flex flex-col items-center justify-center bg-white py-16 dark:bg-[#161615]"
                     >
                         <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#f5f5f3] dark:bg-[#1e1e1c]">
@@ -169,7 +201,7 @@ function actorDisplay(log: LogEntry): string {
                             </thead>
                             <tbody class="divide-y divide-[#e3e3e0] dark:divide-[#3E3E3A]">
                                 <tr
-                                    v-for="log in filteredLogs"
+                                    v-for="log in logs.data"
                                     :key="log.id"
                                     class="transition hover:bg-[#f9f9f8] dark:hover:bg-[#1a1a18]"
                                 >
@@ -196,6 +228,33 @@ function actorDisplay(log: LogEntry): string {
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div v-if="logs.last_page > 1" class="mt-4 flex items-center justify-between text-sm">
+                    <p class="text-[#706f6c] dark:text-[#A1A09A]">
+                        Página {{ logs.current_page }} de {{ logs.last_page }}
+                        <span class="ml-1">({{ logs.total }} eventos)</span>
+                    </p>
+                    <div class="flex items-center gap-1">
+                        <template v-for="link in logs.links" :key="link.label">
+                            <button
+                                v-if="link.url"
+                                type="button"
+                                class="min-w-[32px] rounded-sm border px-2 py-1 text-xs transition"
+                                :class="link.active
+                                    ? 'border-[#1b1b18] bg-[#1b1b18] text-white dark:border-[#EDEDEC] dark:bg-[#EDEDEC] dark:text-[#1b1b18]'
+                                    : 'border-[#e3e3e0] bg-white text-[#1b1b18] hover:bg-[#f5f5f3] dark:border-[#3E3E3A] dark:bg-[#161615] dark:text-[#EDEDEC] dark:hover:bg-[#1e1e1c]'"
+                                @click="goToPage(link.url)"
+                                v-html="link.label"
+                            />
+                            <span
+                                v-else
+                                class="min-w-[32px] rounded-sm border border-[#e3e3e0] px-2 py-1 text-center text-xs text-[#b5b3ad] dark:border-[#3E3E3A] dark:text-[#55544f]"
+                                v-html="link.label"
+                            />
+                        </template>
                     </div>
                 </div>
             </div>

@@ -33,6 +33,18 @@ final class Setting extends Model
         self::updateOrCreate(['key' => $key], ['value' => $value]);
     }
 
+    /** @return array{type: string, custom_pattern: string} */
+    public static function usernameValidation(): array
+    {
+        $raw = self::whereIn('key', ['username_validation_type', 'username_custom_pattern'])
+            ->pluck('value', 'key');
+
+        return [
+            'type' => $raw->get('username_validation_type') ?? '',
+            'custom_pattern' => $raw->get('username_custom_pattern') ?? '',
+        ];
+    }
+
     /** @return array{app_name: string, show_logo: bool, primary_color: string, custom_css: string, logo_url: string|null, bg_color: string} */
     public static function loginSettings(): array
     {

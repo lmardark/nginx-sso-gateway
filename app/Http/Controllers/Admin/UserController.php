@@ -6,7 +6,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\Setting;
 use App\Models\User;
+use App\Services\Auth\UsernameValidationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +21,7 @@ final class UserController extends Controller
     {
         return Inertia::render('Admin/Users/Index', [
             'users' => User::query()->orderBy('created_at', 'desc')
-                ->get(['id', 'username', 'nickname', 'created_at']),
+                ->get(['id', 'username', 'nickname', 'is_admin', 'created_at']),
         ]);
     }
 
@@ -30,12 +32,25 @@ final class UserController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $validation = Setting::usernameValidation();
+        $usernameRules = [
+            'required', 'string', 'max:255', 'unique:users,username',
+            ...UsernameValidationService::buildRules($validation['type'], $validation['custom_pattern']),
+        ];
+
         $validated = $request->validate([
-            'username' => ['required', 'string', 'max:255', 'unique:users,username'],
+            'nickname' => ['nullable', 'string', 'max:255'],
+            'username' => $usernameRules,
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'is_admin' => ['nullable', 'boolean'],
         ]);
 
-        $user = User::query()->create($validated);
+        $user = User::query()->create([
+            'nickname' => ($validated['nickname'] ?? '') ?: null,
+            'username' => $validated['username'],
+            'password' => $validated['password'],
+            'is_admin' => (bool) ($validated['is_admin'] ?? false),
+        ]);
 
         ActivityLog::create([
             'actor_id' => Auth::id(),
@@ -51,18 +66,26 @@ final class UserController extends Controller
     public function edit(User $user): Response
     {
         return Inertia::render('Admin/Users/Edit', [
-            'user' => $user->only('id', 'username', 'created_at'),
+            'user' => $user->only('id', 'username', 'nickname', 'is_admin', 'created_at'),
         ]);
     }
 
     public function update(Request $request, User $user): RedirectResponse
     {
         $validated = $request->validate([
+            'nickname' => ['nullable', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', 'unique:users,username,'.$user->id],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'is_admin' => ['required', 'boolean'],
         ]);
 
+        if ($user->id === Auth::id() && ! $validated['is_admin']) {
+            return back()->withErrors(['is_admin' => 'Você não pode remover seu próprio privilégio de administrador.']);
+        }
+
+        $user->nickname = ($validated['nickname'] ?? '') ?: null;
         $user->username = $validated['username'];
+        $user->is_admin = $validated['is_admin'];
 
         if (! empty($validated['password'])) {
             $user->password = $validated['password'];
@@ -83,6 +106,10 @@ final class UserController extends Controller
 
     public function destroy(Request $request, User $user): RedirectResponse
     {
+        if ($user->id === Auth::id()) {
+            abort(403);
+        }
+
         $username = $user->username;
         $user->delete();
 

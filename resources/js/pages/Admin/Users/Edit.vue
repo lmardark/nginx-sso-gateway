@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import AppHeader from '@/components/AppHeader.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 
@@ -8,19 +9,26 @@ const props = defineProps<{
         user: {
             username: string;
             nickname?: string;
+            is_admin: boolean;
         };
     };
     user: {
         id: number;
         username: string;
+        nickname?: string;
+        is_admin: boolean;
         created_at: string;
     };
 }>();
 
+const isSelf = computed(() => props.auth.user.username === props.user.username);
+
 const form = useForm({
-    username: props.user.username,
-    password: '',
+    nickname:              props.user.nickname ?? '',
+    username:              props.user.username,
+    password:              '',
     password_confirmation: '',
+    is_admin:              props.user.is_admin,
 });
 
 function submit() {
@@ -83,9 +91,50 @@ function submit() {
                                         class="w-full rounded-sm border border-[#e3e3e0] bg-[#FDFDFC] px-3 py-2 text-sm text-[#1b1b18] outline-none transition placeholder:text-[#b5b3ad] focus:border-[#1b1b18] focus:ring-1 focus:ring-[#1b1b18] dark:border-[#3E3E3A] dark:bg-[#1a1a18] dark:text-[#EDEDEC] dark:placeholder:text-[#55544f] dark:focus:border-[#EDEDEC] dark:focus:ring-[#EDEDEC]"
                                         :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': form.errors.username }"
                                     />
-                                    <p v-if="form.errors.username" class="text-xs text-red-500">
-                                        {{ form.errors.username }}
+                                    <p v-if="form.errors.username" class="text-xs text-red-500">{{ form.errors.username }}</p>
+                                </div>
+
+                                <!-- Nickname -->
+                                <div class="flex flex-col gap-1.5">
+                                    <label for="nickname" class="text-sm font-medium text-[#1b1b18] dark:text-[#EDEDEC]">
+                                        Apelido
+                                    </label>
+                                    <input
+                                        id="nickname"
+                                        v-model="form.nickname"
+                                        type="text"
+                                        placeholder="Nome de exibição (opcional)"
+                                        class="w-full rounded-sm border border-[#e3e3e0] bg-[#FDFDFC] px-3 py-2 text-sm text-[#1b1b18] outline-none transition placeholder:text-[#b5b3ad] focus:border-[#1b1b18] focus:ring-1 focus:ring-[#1b1b18] dark:border-[#3E3E3A] dark:bg-[#1a1a18] dark:text-[#EDEDEC] dark:placeholder:text-[#55544f] dark:focus:border-[#EDEDEC] dark:focus:ring-[#EDEDEC]"
+                                        :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': form.errors.nickname }"
+                                    />
+                                    <p v-if="form.errors.nickname" class="text-xs text-red-500">{{ form.errors.nickname }}</p>
+                                </div>
+
+                                <!-- is_admin -->
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="flex cursor-pointer items-center gap-3" :class="{ 'cursor-not-allowed opacity-60': isSelf }">
+                                        <div class="relative">
+                                            <input
+                                                v-model="form.is_admin"
+                                                type="checkbox"
+                                                :disabled="isSelf"
+                                                class="sr-only"
+                                            />
+                                            <div
+                                                class="h-5 w-9 rounded-full transition"
+                                                :class="form.is_admin ? 'bg-amber-500' : 'bg-[#e3e3e0] dark:bg-[#3E3E3A]'"
+                                            ></div>
+                                            <div
+                                                class="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform"
+                                                :class="form.is_admin ? 'translate-x-4' : 'translate-x-0'"
+                                            ></div>
+                                        </div>
+                                        <span class="text-sm font-medium text-[#1b1b18] dark:text-[#EDEDEC]">Administrador</span>
+                                    </label>
+                                    <p v-if="isSelf" class="text-xs text-[#706f6c] dark:text-[#A1A09A]">
+                                        Você não pode alterar seu próprio privilégio de administrador.
                                     </p>
+                                    <p v-if="form.errors.is_admin" class="text-xs text-red-500">{{ form.errors.is_admin }}</p>
                                 </div>
                             </div>
                         </div>

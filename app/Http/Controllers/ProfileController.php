@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -24,13 +25,20 @@ final class ProfileController extends Controller
         ]);
 
         $user = $request->user();
-        $user->nickname = $validated['nickname'] !== '' ? ($validated['nickname'] ?? null) : null;
+        $user->nickname = ($validated['nickname'] ?? '') ?: null;
 
         if (! empty($validated['password'])) {
             $user->password = $validated['password'];
         }
 
         $user->save();
+
+        ActivityLog::create([
+            'actor_id' => $user->id,
+            'event' => 'profile_updated',
+            'target_username' => $user->username,
+            'ip_address' => $request->ip(),
+        ]);
 
         return redirect()->route('profile.edit')
             ->with('success', 'Perfil atualizado com sucesso.');
