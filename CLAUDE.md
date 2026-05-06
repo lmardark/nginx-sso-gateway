@@ -73,12 +73,15 @@ The `return_to` host is validated against `ALLOWED_HOST_REDIRECT` (env var → `
 app/
 ├── Http/
 │   ├── Controllers/
+│   │   ├── Admin/AppController.php       # App CRUD + regenerateApiKey (admin only)
 │   │   ├── Admin/AuditController.php     # Activity log listing (admin only)
 │   │   ├── Admin/SetupController.php     # First-run admin setup
 │   │   ├── Admin/SettingsController.php  # Login page customization (admin only)
 │   │   ├── Admin/UserController.php      # User CRUD (admin only)
 │   │   ├── Auth/AuthController.php       # Login / logout
-│   │   └── ProfileController.php         # Authenticated user's own profile; password change requires current_password for non-admins
+│   │   ├── HealthController.php          # GET /health — JSON status + DB check
+│   │   ├── ProfileController.php         # Authenticated user's own profile; password change requires current_password for non-admins
+│   │   └── Sso/TokenController.php       # GET /sso/token (issue JWT) + POST /sso/validate
 │   ├── Middleware/
 │   │   ├── CheckFirstSetup.php
 │   │   ├── UniversalAuth.php
@@ -86,10 +89,13 @@ app/
 │   └── Requests/Auth/LoginRequest.php
 ├── Models/
 │   ├── ActivityLog.php  # Immutable event log (actor_id, event, target_username, ip_address)
+│   ├── App.php          # SSO app (name, api_key, allowed_domains JSON, callback_url, active); App::generateApiKey()
 │   ├── Setting.php      # Key-value settings store; use Setting::loginSettings() for login settings, Setting::usernameValidation() for username validation config
+│   ├── SsoToken.php     # One-time JWT JTI record (jti, user_id, app_id, expires_at, used_at)
 │   └── User.php         # username (unique), nickname, password (hashed), is_admin
 └── Services/Auth/
     ├── AuthService.php              # Wraps Auth::attempt()
+    ├── JwtService.php               # Pure-PHP HS256 JWT encode/decode (no library)
     └── UsernameValidationService.php  # Builds Laravel validation rules for CPF / Celular / Personalizado (regex)
 ```
 
@@ -148,6 +154,7 @@ resources/js/
 ├── pages/                    # One Vue component per route
 │   ├── Auth/Login.vue
 │   ├── Admin/Audit.vue
+│   ├── Admin/Apps/{Index,Create,Edit}.vue
 │   ├── Admin/Settings.vue
 │   ├── Admin/Setup.vue
 │   ├── Admin/Users/{Index,Create,Edit}.vue
@@ -174,14 +181,29 @@ resources/js/
 
 | Method | URI | Auth |
 |--------|-----|------|
+| `GET` | `/health` | — |
 | `GET` | `/auth/check` | — (Nginx SSO probe) |
 | `GET/POST` | `/login` | — |
 | `GET/POST` | `/setup` | — (only when no users exist) |
 | `GET` | `/home` | Required |
 | `GET/PUT` | `/profile` | Required |
+| `GET` | `/sso/token?app=<api_key>&redirect=<url>` | Required (redirects with `?sso_token=<jwt>`) |
+| `POST` | `/sso/validate` | — (body: `{token, api_key}`) |
 | `GET` | `/admin/audit` | Required + is_admin |
 | `GET/PUT` | `/admin/settings` | Required + is_admin |
 | `GET/POST/PUT/DELETE` | `/admin/users*` | Required + is_admin |
+| `GET/POST/PUT/DELETE` | `/admin/apps*` | Required + is_admin |
+| `POST` | `/admin/apps/{app}/regenerate-key` | Required + is_admin |
+
+### JWT SSO Cross-Domain Flow
+
+1. App redirects user to `GET /sso/token?app=<api_key>&redirect=<callback_url>`
+2. Gateway validates session, checks `allowed_domains`, creates one-time JTI in `sso_tokens`
+3. Issues JWT (HS256, signed with app's `api_key`, TTL 120s) → redirects to `<callback_url>?sso_token=<jwt>`
+4. App backend calls `POST /sso/validate` with `{token, api_key}` to verify and consume the token
+5. Response: `{valid: true, user: {id, username, nickname, is_admin}}`
+
+`JwtService::encode/decode` is a pure-PHP HS256 implementation — no external library needed.
 
 ### PHP Code Conventions (enforced by Pint)
 
@@ -220,5 +242,7 @@ SQLite by default (`database/database.sqlite`). Session driver is `database`.
 | `sessions` | Laravel session store |
 | `activity_logs` | Immutable event log; `UPDATED_AT = null`; actor nullable for failed logins |
 | `settings` | Key-value store; primary key is `key` (string); no timestamps |
+| `apps` | SSO client apps; `api_key` is the JWT signing secret; `allowed_domains` is a JSON array |
+| `sso_tokens` | One-time JWT JTI records; `used_at` set on first validation (replay protection) |
 
 > **Vite manifest and tests**: `public/build` is gitignored. Tests that render Inertia pages (e.g. `assertOk()` on `/home`) require a built manifest. Run `pnpm run build` after adding new page components, otherwise those tests will fail with *"Unable to locate file in Vite manifest"*.
