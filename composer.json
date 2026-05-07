@@ -41,7 +41,6 @@
     "scripts": {
         "setup": [
             "composer install",
-            "composer require --dev larastan/larastan",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
             "@php artisan key:generate",
             "@php artisan migrate --force",
